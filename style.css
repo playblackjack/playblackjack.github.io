@@ -15,8 +15,8 @@
             margin: 0 auto;
         }
         .table {
-            background-image: url('table.jpeg') no-repeat center center;
-            background: var(--table-color);
+            background: url('table.jpeg') no-repeat center center;
+            background-color: var(--table-color);
             border-radius: 20px;
             padding: 20px;
             box-shadow: 0 0 25px rgba(0,0,0,0.7);
