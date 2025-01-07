@@ -265,9 +265,11 @@ classBlackjackGame {
     }
     NoMoney(amount) {
     if (this.bankroll === 0) {
-        window.close();
+        setTimeout(() => {
+            location.reload(); // Refresh the page
+        }, 3000); // Wait for 3000 milliseconds (3 seconds)
     }
-  }
+}
     clearBet() {
         this.currentBet = 0;
         document.getElementById('bet-amount').value = '0';
