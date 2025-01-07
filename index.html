@@ -1,0 +1,75 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Casino-style Blackjack</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="game-container">
+    <center>
+        <div class="title"> 
+             <h1>Blackjack</h1>
+        </div>
+    </center>
+        <div class="role-select" id="role-select">
+            <h2>Choose Your Role</h2>
+            <button onclick="startGame('player')">Player</button>
+            <button onclick="startGame('dealer')" disabled>Dealer</button>
+            <p>!!! - Playing Dealer currently unavailable - !!!</p>
+        </div>
+        
+        <div class="table" id="game-table" style="display: none;">
+            <div class="stats">
+                <div>Your Total: $<span id="bankroll">250</span></div>
+                <div>Current Bet: $<span id="current-bet">0</span></div>
+                <div>Hands Won: <span id="hands-won">0</span></div>
+                <div>Running Count: <span id="count">0</span></div>
+            </div>
+
+            <div class="dealer-section">
+                <h2>Dealer's Hand</h2>
+                <div id="dealer-hand" class="hand"></div>
+                <div id="dealer-score"></div>
+            </div>
+
+            <div class="player-section">
+                <h2>Player's Hand (you)</h2>
+                <div id="player-hand" class="hand"></div>
+                <div id="player-score"></div>
+                <div id="split-hand" class="hand" style="display: none;"></div>
+                <div id="split-score"></div>
+            </div>
+
+            <div class="betting-controls">
+                <div class="chips">
+                    <div class="chip" style="background: white; border: 2px dashed black; color: black;" onclick="addToBet(1)">1</div>
+                    <div class="chip" style="background: red;" onclick="addToBet(5)">5</div>
+                    <div class="chip" style="background: blue;" onclick="addToBet(10)">10</div>
+                    <div class="chip" style="background: green;" onclick="addToBet(25)">25</div>
+                    <div class="chip" style="background: yellow; border: 2px dashed black; color: black;" onclick="addToBet(50)">50</div>
+                    <div class="chip" style="background: black;" onclick="addToBet(100)">100</div>
+                </div>
+                <input type="number" id="bet-amount" min="5" value="0" readonly>
+                <button id="clear-bet">Clear Bet</button>
+            </div>
+
+            <div class="controls">
+                <button id="deal">Deal</button>
+                <button id="hit" disabled>Hit</button>
+                <button id="stand" disabled>Stand</button>
+                <button id="double" disabled>Double Down</button>
+                <button id="split" disabled>Split</button>
+                <button id="insurance" disabled>Insurance</button>
+                <button id="surrender" disabled>Surrender</button>
+            </div>
+
+            <div id="message" class="message"></div>
+        </div>
+    </div>
+
+<script src="main.js"></script>
+<script src="extraFunctons.js"></script>
+</body>
+</html>
