@@ -1,4 +1,4 @@
-letgame;
+let game;
 
 functionstartGame(role) {
     document.getElementById('role-select').style.display = 'none';
