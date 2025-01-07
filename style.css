@@ -6,7 +6,6 @@
         body {
             font-family: Arial, sans-serif;
             background: var(--table-color);
-            background: url('table-texture.jpeg') no-repeat center center;
             color: var(--text-color);
             margin: 0;
             padding: 20px;
@@ -16,6 +15,7 @@
             margin: 0 auto;
         }
         .table {
+            background-image: url('table.jpeg') no-repeat center center;
             background: var(--table-color);
             border-radius: 20px;
             padding: 20px;
