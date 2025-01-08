@@ -188,7 +188,7 @@
                     <div class="chip" style="background: green;" onclick="addToBet(25)">25</div>
                     <div class="chip" style="background: yellow; border: 2px dashed black; color: black;" onclick="addToBet(50)">50</div>
                     <div class="chip" style="background: black;" onclick="addToBet(100)">100</div>
-                    <div class="chip" style="background-image:90deg, red, orange, yellow, green, blue, #4300A8;" id="all-in">All</div>
+                    <div class="chip" style="background-image: linear-gradient(90deg, red, orange, yellow, green, blue, #4300A8);" id="all-in">All</div>
                 </div>
                 <input type="number" id="bet-amount" min="5" value="0" readonly>
                 <button id="clear-bet">Clear Bet</button>
@@ -490,14 +490,6 @@ class BlackjackGame {
         document.getElementById('bet-amount').value = '0';
         this.updateStats();
     }
-    addToBet(amount) {
-        if (this.bankroll >= amount) {
-            this.currentBet += amount;
-            document.getElementById('bet-amount').value = this.currentBet;
-            this.updateStats();
-        }
-    }
-}
 
 let game;
 
