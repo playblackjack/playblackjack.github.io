@@ -188,7 +188,6 @@
                     <div class="chip" style="background: green;" onclick="addToBet(25)">25</div>
                     <div class="chip" style="background: yellow; border: 2px dashed black; color: black;" onclick="addToBet(50)">50</div>
                     <div class="chip" style="background: black;" onclick="addToBet(100)">100</div>
-                    <div class="chip" style="background-image: linear-gradient(90deg, red, orange, yellow, green, blue, #4300A8);" id="all-in">All</div>
                 </div>
                 <input type="number" id="bet-amount" min="5" value="0" readonly>
                 <button id="clear-bet">Clear Bet</button>
@@ -228,7 +227,6 @@ class BlackjackGame {
         this.initializeGame();
         this.setupEventListeners();
         this.NoMoney();
-        this.allIn();
     }
     initializeGame() {
         this.createDeck();
@@ -471,25 +469,25 @@ class BlackjackGame {
         document.getElementById('insurance').addEventListener('click', () => this.insurance());
         document.getElementById('surrender').addEventListener('click', () => this.surrender());
         document.getElementById('clear-bet').addEventListener('click', () => this.clearBet());
-        document.getElementById('all-in').addEventListener('click', () => this.allIn());
     }
     NoMoney(amount) {
         if (this.bankroll == 0) {
-            window.close();
+            window.close;
         }
     }
-
-    allIn() {
-        this.currentBet = this.bankroll; // Set current bet to bankroll
-        document.getElementById('bet-amount').value = this.currentBet; // Update the bet amount
-        this.updateStats(); // Refresh the stats displayed
-    }
-    
     clearBet() {
         this.currentBet = 0;
         document.getElementById('bet-amount').value = '0';
         this.updateStats();
     }
+    addToBet(amount) {
+        if (this.bankroll >= amount) {
+            this.currentBet += amount;
+            document.getElementById('bet-amount').value = this.currentBet;
+            this.updateStats();
+        }
+    }
+}
 
 let game;
 
@@ -500,14 +498,8 @@ function startGame(role) {
     game.playerRole = role;
 }
 
-addToBet(amount) {
-    if (this.bankroll >= amount && (this.currentBet + amount) >= 5) {
-        this.currentBet += amount;
-        document.getElementById('bet-amount').value = this.currentBet;
-        this.updateStats();
-    } else if ((this.currentBet + amount) < 5) {
-        alert('Minimum bet is $5. Please fix your bet.');
-    }
+function addToBet(amount) {
+    game.addToBet(amount);
 }
 </script>
 </body>
