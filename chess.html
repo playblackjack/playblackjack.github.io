@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Advanced Chess Game - Player vs AI</title>
+    <title>Player vs AI Chess</title>
     <link rel="stylesheet" href="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.css">
     <style>
         .container {
@@ -116,7 +116,7 @@
     <script src="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
     <script>
-      let board = null;
+let board = null;
 let game = new Chess();
 let difficulty = 1;
 let moveHistory = [];
@@ -136,6 +136,17 @@ const openingBook = {
     'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3': ['e5', 'c5', 'e6'],
     'rnbqkbnr/pppppppp/8/8/3P4/8/PPP1PPPP/RNBQKBNR b KQkq d3': ['Nf6', 'd5', 'f5']
 };
+
+const pawnPositionWhite = [
+    [0,  0,  0,  0,  0,  0,  0,  0],
+    [50, 50, 50, 50, 50, 50, 50, 50],
+    [10, 10, 20, 30, 30, 20, 10, 10],
+    [5,  5, 10, 25, 25, 10,  5,  5],
+    [0,  0,  0, 20, 20,  0,  0,  0],
+    [5, -5,-10,  0,  0,-10, -5,  5],
+    [5, 10, 10,-20,-20, 10, 10,  5],
+    [0,  0,  0,  0,  0,  0,  0,  0]
+];
 
 function playSound(type) {
     const sound = document.getElementById(type === 'capture' ? 'captureSound' : 'moveSound');
@@ -192,33 +203,27 @@ function onDragStart(source, piece) {
 }
 
 function makeAIMove() {
-    const fen = game.fen();
-    if (openingBook[fen]) {
-        const bookMoves = openingBook[fen];
-        const move = bookMoves[Math.floor(Math.random() * bookMoves.length)];
+    const moves = game.moves();
+    if (moves.length === 0) return;
+
+    let bestMove = null;
+    let bestValue = -Infinity;
+    const depth = difficulty * 2;
+
+    moves.sort(() => Math.random() - 0.5);
+
+    for (const move of moves) {
         game.move(move);
-    } else {
-        const moves = game.moves();
-        if (moves.length === 0) return;
-
-        let bestMove = null;
-        let bestValue = -9999;
-
-        for (let i = 0; i < moves.length; i++) {
-            const move = moves[i];
-            game.move(move);
-            const value = minimax(difficulty * 2 - 1, -10000, 10000, false);
-            game.undo();
-            
-            if (value >= bestValue) {
-                bestValue = value;
-                bestMove = move;
-            }
+        const value = -minimax(depth - 1, -Infinity, Infinity, false);
+        game.undo();
+        
+        if (value > bestValue) {
+            bestValue = value;
+            bestMove = move;
         }
-
-        game.move(bestMove);
     }
 
+    game.move(bestMove);
     const move = game.history({verbose: true})[game.history().length - 1];
     const isCapture = move.captured !== undefined;
     playSound(isCapture ? 'capture' : 'move');
@@ -235,7 +240,7 @@ function minimax(depth, alpha, beta, isMaximizing) {
     const moves = game.moves();
     
     if (isMaximizing) {
-        let maxValue = -9999;
+        let maxValue = -Infinity;
         for (const move of moves) {
             game.move(move);
             maxValue = Math.max(maxValue, minimax(depth - 1, alpha, beta, false));
@@ -245,7 +250,7 @@ function minimax(depth, alpha, beta, isMaximizing) {
         }
         return maxValue;
     } else {
-        let minValue = 9999;
+        let minValue = Infinity;
         for (const move of moves) {
             game.move(move);
             minValue = Math.min(minValue, minimax(depth - 1, alpha, beta, true));
@@ -258,25 +263,40 @@ function minimax(depth, alpha, beta, isMaximizing) {
 }
 
 function evaluateBoard() {
+    if (game.in_checkmate()) {
+        return game.turn() === 'w' ? -9999 : 9999;
+    }
+    
     let value = 0;
     const pieceValues = {
-        'p': 1,
-        'n': 3,
-        'b': 3,
-        'r': 5,
-        'q': 9,
-        'k': 100
+        'p': 100,
+        'n': 320,
+        'b': 330,
+        'r': 500,
+        'q': 900,
+        'k': 20000
     };
 
+    value += game.moves().length * 10;
+    
     for (let i = 0; i < 8; i++) {
         for (let j = 0; j < 8; j++) {
-            const piece = game.get(String.fromCharCode(97 + i) + (j + 1));
+            const square = String.fromCharCode(97 + i) + (j + 1);
+            const piece = game.get(square);
             if (piece) {
-                const multiplier = piece.color === 'w' ? 1 : -1;
-                value += pieceValues[piece.type.toLowerCase()] * multiplier;
+                let pieceValue = pieceValues[piece.type.toLowerCase()];
+                
+                if (piece.type === 'p') {
+                    pieceValue += piece.color === 'w' ? 
+                        pawnPositionWhite[7-j][i] : 
+                        pawnPositionWhite[j][i];
+                }
+                
+                value += piece.color === 'w' ? pieceValue : -pieceValue;
             }
         }
     }
+    
     return value;
 }
 
@@ -325,7 +345,8 @@ function initGame() {
         draggable: true,
         position: 'start',
         onDragStart: onDragStart,
-        onDrop: onDrop
+        onDrop: onDrop,
+        pieceTheme: 'unicode'
     });
     
     updateStatus();
@@ -343,7 +364,7 @@ $(document).ready(function() {
     $('#newGame').click(function() {
         initGame();
     });
-});
+});   
 </script>
 </body>
 </html>
