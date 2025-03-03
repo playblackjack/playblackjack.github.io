@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Advanced Chess Game - Player vs AI</title>
+    <link rel="stylesheet" href="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.css">
+    <style>
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .game-info {
+            text-align: center;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+
+        .board-container {
+            display: flex;
+            gap: 20px;
+        }
+
+        #board {
+            width: 600px;
+        }
+
+        .side-panel {
+            width: 200px;
+            padding: 20px;
+            background: #f5f5f5;
+            border-radius: 8px;
+        }
+
+        .captured-pieces {
+            margin: 10px 0;
+            min-height: 50px;
+        }
+
+        .captured-pieces img {
+            width: 30px;
+            height: 30px;
+        }
+
+        #moveHistory {
+            height: 300px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin-top: 10px;
+        }
+
+        select, button {
+            padding: 10px;
+            margin: 10px;
+            font-size: 16px;
+        }
+
+        #status {
+            font-size: 18px;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        .move-row {
+            display: flex;
+            margin: 5px 0;
+        }
+
+        .move-number {
+            width: 30px;
+        }
+
+        .move {
+            flex: 1;
+            padding: 0 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="game-info">
+            <h1>Advanced Chess Game - Player vs AI</h1>
+            <select id="difficulty">
+                <option value="1">Level 1 (Beginner)</option>
+                <option value="2">Level 2 (Easy)</option>
+                <option value="3">Level 3 (Medium)</option>
+                <option value="4">Level 4 (Hard)</option>
+                <option value="5">Level 5 (Expert)</option>
+            </select>
+            <button id="newGame">New Game</button>
+            <p id="status"></p>
+        </div>
+        <div class="board-container">
+            <div class="side-panel">
+                <h3>Captured White Pieces</h3>
+                <div id="capturedBlack" class="captured-pieces"></div>
+                <h3>Move History</h3>
+                <div id="moveHistory"></div>
+            </div>
+            <div id="board"></div>
+            <div class="side-panel">
+                <h3>Captured Black Pieces</h3>
+                <div id="capturedWhite" class="captured-pieces"></div>
+            </div>
+        </div>
+    </div>
+
+    <audio id="moveSound" src="data:audio/mp3;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4LjI5LjEwMAAAAAAAAAAAAAAA//tQwAAAAAAAAAAAAAAAAAAAAAAASW5mbwAAAA8AAAADAAAGhgBVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVWqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqr///////////////////////////////////////////8AAAAATGF2YzU4LjU0AAAAAAAAAAAAAAAAJAAAAAAAAAAAAoZxhxX2AAAAAAAAAAAAAAAAAAAA//tQxAAACVDlIgQwYgEjmWc/PCAAAFBHAAAAAAA0kBIAAAEkAAAAACEkBIAAAEkAAAAACQAAP/qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqr/+xDE1gPAAAGkAAAAIAAANIAAAASqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqg==" preload="auto"></audio>
+    <audio id="captureSound" src="data:audio/mp3;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4LjI5LjEwMAAAAAAAAAAAAAAA//tQwAAAAAAAAAAAAAAAAAAAAAAASW5mbwAAAA8AAAADAAAGhgBVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVWqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqr///////////////////////////////////////////8AAAAATGF2YzU4LjU0AAAAAAAAAAAAAAAAJAAAAAAAAAAAAoZxhxX2AAAAAAAAAAAAAAAAAAAA//tQxAAACZjpQgQwYgEvnSn/PCAAAPgnAAAAAAAA0kAIAAAEkAAAAABpIAQAAAJIAAAAABIAAH/6qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqv/7EMTWg8AAAaQAAAAgAAA0gAAABKqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq" preload="auto"></audio>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
+    <script>
+      let board = null;
+let game = new Chess();
+let difficulty = 1;
+let moveHistory = [];
+let capturedPieces = { w: [], b: [] };
+
+const PIECES = {
+    w: {
+        p: '♙', r: '♖', n: '♘', b: '♗', q: '♕', k: '♔'
+    },
+    b: {
+        p: '♟', r: '♜', n: '♞', b: '♝', q: '♛', k: '♚'
+    }
+};
+
+const openingBook = {
+    'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq -': ['e4', 'd4', 'Nf3'],
+    'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3': ['e5', 'c5', 'e6'],
+    'rnbqkbnr/pppppppp/8/8/3P4/8/PPP1PPPP/RNBQKBNR b KQkq d3': ['Nf6', 'd5', 'f5']
+};
+
+function playSound(type) {
+    const sound = document.getElementById(type === 'capture' ? 'captureSound' : 'moveSound');
+    sound.currentTime = 0;
+    sound.play();
+}
+
+function updateCapturedPieces() {
+    const positions = game.board();
+    const currentPieces = { w: [], b: [] };
+    
+    positions.forEach(row => {
+        row.forEach(piece => {
+            if (piece) {
+                currentPieces[piece.color].push(piece.type);
+            }
+        });
+    });
+
+    const initialPieces = {
+        w: ['p','p','p','p','p','p','p','p','r','n','b','q','k','b','n','r'],
+        b: ['p','p','p','p','p','p','p','p','r','n','b','q','k','b','n','r']
+    };
+
+    capturedPieces = {
+        w: initialPieces.w.filter(p => currentPieces.w.filter(cp => cp === p).length < initialPieces.w.filter(ip => ip === p).length),
+        b: initialPieces.b.filter(p => currentPieces.b.filter(cp => cp === p).length < initialPieces.b.filter(ip => ip === p).length)
+    };
+
+    $('#capturedWhite').html(capturedPieces.w.map(p => PIECES.w[p]).join(' '));
+    $('#capturedBlack').html(capturedPieces.b.map(p => PIECES.b[p]).join(' '));
+}
+
+function updateMoveHistory(move) {
+    moveHistory.push(move);
+    const moveHistoryDiv = $('#moveHistory');
+    let html = '';
+    
+    for (let i = 0; i < moveHistory.length; i += 2) {
+        html += `<div class="move-row">
+            <span class="move-number">${Math.floor(i/2) + 1}.</span>
+            <span class="move">${moveHistory[i]}</span>
+            <span class="move">${moveHistory[i+1] || ''}</span>
+        </div>`;
+    }
+    
+    moveHistoryDiv.html(html);
+    moveHistoryDiv.scrollTop(moveHistoryDiv[0].scrollHeight);
+}
+
+function onDragStart(source, piece) {
+    if (game.game_over()) return false;
+    if (piece.search(/^b/) !== -1) return false;
+}
+
+function makeAIMove() {
+    const fen = game.fen();
+    if (openingBook[fen]) {
+        const bookMoves = openingBook[fen];
+        const move = bookMoves[Math.floor(Math.random() * bookMoves.length)];
+        game.move(move);
+    } else {
+        const moves = game.moves();
+        if (moves.length === 0) return;
+
+        let bestMove = null;
+        let bestValue = -9999;
+
+        for (let i = 0; i < moves.length; i++) {
+            const move = moves[i];
+            game.move(move);
+            const value = minimax(difficulty * 2 - 1, -10000, 10000, false);
+            game.undo();
+            
+            if (value >= bestValue) {
+                bestValue = value;
+                bestMove = move;
+            }
+        }
+
+        game.move(bestMove);
+    }
+
+    const move = game.history({verbose: true})[game.history().length - 1];
+    const isCapture = move.captured !== undefined;
+    playSound(isCapture ? 'capture' : 'move');
+    
+    board.position(game.fen());
+    updateStatus();
+    updateCapturedPieces();
+    updateMoveHistory(game.history()[game.history().length - 1]);
+}
+
+function minimax(depth, alpha, beta, isMaximizing) {
+    if (depth === 0) return evaluateBoard();
+    
+    const moves = game.moves();
+    
+    if (isMaximizing) {
+        let maxValue = -9999;
+        for (const move of moves) {
+            game.move(move);
+            maxValue = Math.max(maxValue, minimax(depth - 1, alpha, beta, false));
+            game.undo();
+            alpha = Math.max(alpha, maxValue);
+            if (beta <= alpha) break;
+        }
+        return maxValue;
+    } else {
+        let minValue = 9999;
+        for (const move of moves) {
+            game.move(move);
+            minValue = Math.min(minValue, minimax(depth - 1, alpha, beta, true));
+            game.undo();
+            beta = Math.min(beta, minValue);
+            if (beta <= alpha) break;
+        }
+        return minValue;
+    }
+}
+
+function evaluateBoard() {
+    let value = 0;
+    const pieceValues = {
+        'p': 1,
+        'n': 3,
+        'b': 3,
+        'r': 5,
+        'q': 9,
+        'k': 100
+    };
+
+    for (let i = 0; i < 8; i++) {
+        for (let j = 0; j < 8; j++) {
+            const piece = game.get(String.fromCharCode(97 + i) + (j + 1));
+            if (piece) {
+                const multiplier = piece.color === 'w' ? 1 : -1;
+                value += pieceValues[piece.type.toLowerCase()] * multiplier;
+            }
+        }
+    }
+    return value;
+}
+
+function onDrop(source, target) {
+    const move = game.move({
+        from: source,
+        to: target,
+        promotion: 'q'
+    });
+
+    if (move === null) return 'snapback';
+    
+    const isCapture = move.captured !== undefined;
+    playSound(isCapture ? 'capture' : 'move');
+    
+    updateStatus();
+    updateCapturedPieces();
+    updateMoveHistory(game.history()[game.history().length - 1]);
+    
+    window.setTimeout(makeAIMove, 250);
+}
+
+function updateStatus() {
+    let status = '';
+    
+    if (game.in_checkmate()) {
+        status = game.turn() === 'w' ? 'Game Over - Black Wins!' : 'Game Over - White Wins!';
+    } else if (game.in_draw()) {
+        status = 'Game Over - Draw!';
+    } else {
+        status = game.turn() === 'w' ? 'White to move' : 'Black to move';
+        if (game.in_check()) {
+            status += ' - CHECK!';
+        }
+    }
+    
+    $('#status').text(status);
+}
+
+function initGame() {
+    game = new Chess();
+    moveHistory = [];
+    capturedPieces = { w: [], b: [] };
+    
+    board = Chessboard('board', {
+        draggable: true,
+        position: 'start',
+        onDragStart: onDragStart,
+        onDrop: onDrop
+    });
+    
+    updateStatus();
+    updateCapturedPieces();
+    $('#moveHistory').empty();
+}
+
+$(document).ready(function() {
+    initGame();
+    
+    $('#difficulty').change(function() {
+        difficulty = parseInt($(this).val());
+    });
+    
+    $('#newGame').click(function() {
+        initGame();
+    });
+});
+</script>
+</body>
+</html>
