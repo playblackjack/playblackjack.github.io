@@ -176,8 +176,12 @@ function updateCapturedPieces() {
         b: initialPieces.b.filter(p => currentPieces.b.filter(cp => cp === p).length < initialPieces.b.filter(ip => ip === p).length)
     };
 
-    $('#capturedWhite').html(capturedPieces.w.map(p => PIECES.w[p]).join(' '));
-    $('#capturedBlack').html(capturedPieces.b.map(p => PIECES.b[p]).join(' '));
+    $('#capturedWhite').html(capturedPieces.w.map(p => 
+        `<img src="https://chessboardjs.com/img/chesspieces/wikipedia/w${p.toUpperCase()}.png" width="30" height="30">`
+    ).join(''));
+    $('#capturedBlack').html(capturedPieces.b.map(p => 
+        `<img src="https://chessboardjs.com/img/chesspieces/wikipedia/b${p.toUpperCase()}.png" width="30" height="30">`
+    ).join(''));
 }
 
 function updateMoveHistory(move) {
@@ -341,13 +345,13 @@ function initGame() {
     moveHistory = [];
     capturedPieces = { w: [], b: [] };
     
-    board = Chessboard('board', {
-        draggable: true,
-        position: 'start',
-        onDragStart: onDragStart,
-        onDrop: onDrop,
-        pieceTheme: 'unicode'
-    });
+board = Chessboard('board', {
+    draggable: true,
+    position: 'start',
+    onDragStart: onDragStart,
+    onDrop: onDrop,
+    pieceTheme: 'https://chessboardjs.com/img/chesspieces/wikipedia/{piece}.png'
+});
     
     updateStatus();
     updateCapturedPieces();
