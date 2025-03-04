@@ -109,9 +109,6 @@
         </div>
     </div>
 
-    <audio id="moveSound" src="data:audio/mp3;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4LjI5LjEwMAAAAAAAAAAAAAAA//tQwAAAAAAAAAAAAAAAAAAAAAAASW5mbwAAAA8AAAADAAAGhgBVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVWqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqr///////////////////////////////////////////8AAAAATGF2YzU4LjU0AAAAAAAAAAAAAAAAJAAAAAAAAAAAAoZxhxX2AAAAAAAAAAAAAAAAAAAA//tQxAAACVDlIgQwYgEjmWc/PCAAAFBHAAAAAAA0kBIAAAEkAAAAACEkBIAAAEkAAAAACQAAP/qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqr/+xDE1gPAAAGkAAAAIAAANIAAAASqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqg==" preload="auto"></audio>
-    <audio id="captureSound" src="data:audio/mp3;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4LjI5LjEwMAAAAAAAAAAAAAAA//tQwAAAAAAAAAAAAAAAAAAAAAAASW5mbwAAAA8AAAADAAAGhgBVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVWqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqr///////////////////////////////////////////8AAAAATGF2YzU4LjU0AAAAAAAAAAAAAAAAJAAAAAAAAAAAAoZxhxX2AAAAAAAAAAAAAAAAAAAA//tQxAAACZjpQgQwYgEvnSn/PCAAAPgnAAAAAAAA0kAIAAAEkAAAAABpIAQAAAJIAAAAABIAAH/6qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqv/7EMTWg8AAAaQAAAAgAAA0gAAABKqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq" preload="auto"></audio>
-
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
@@ -330,18 +327,25 @@ function updateMoveHistory(move) {
 }
 
 function makeAIMove() {
-    if (game.game_over()) return;
-
     const moves = game.moves({ verbose: true });
     if (moves.length === 0) return;
 
     let bestMove = null;
     let bestValue = -Infinity;
-    const depth = difficulty * 2;
+    // Increase depth calculation based on difficulty
+    const depthMap = {
+        1: 2,  // Beginner: 2 moves ahead
+        2: 3,  // Easy: 3 moves ahead
+        3: 4,  // Medium: 4 moves ahead
+        4: 5,  // Hard: 5 moves ahead
+        5: 6   // Expert: 6 moves ahead
+    };
+    const depth = depthMap[difficulty];
 
+    // Improved move sorting for better AI decisions
     moves.sort((a, b) => {
-        const aScore = (a.captured ? 10 : 0) + (a.san.includes('+') ? 5 : 0);
-        const bScore = (b.captured ? 10 : 0) + (b.san.includes('+') ? 5 : 0);
+        const aScore = (a.captured ? getPieceValue(a.captured) : 0) + (a.san.includes('+') ? 50 : 0);
+        const bScore = (b.captured ? getPieceValue(b.captured) : 0) + (b.san.includes('+') ? 50 : 0);
         return bScore - aScore;
     });
 
@@ -356,14 +360,41 @@ function makeAIMove() {
         }
     }
 
-    const moveResult = game.move(bestMove);
-    const isCapture = moveResult.captured !== undefined;
-    playSound(isCapture ? 'capture' : 'move');
-    
+    game.move(bestMove);
+    playEnhancedSound(bestMove);
     board.position(game.fen());
     updateStatus();
     updateCapturedPieces();
     updateMoveHistory(game.history()[game.history().length - 1]);
+}
+
+// Enhanced piece values for better evaluation
+function getPieceValue(piece) {
+    const values = {
+        'p': 100,
+        'n': 320,
+        'b': 330,
+        'r': 500,
+        'q': 900,
+        'k': 20000
+    };
+    return values[piece] || 0;
+}
+
+// Improved sound handling
+function playEnhancedSound(move) {
+    const soundMap = {
+        moveSound: 'data:audio/mp3;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4LjI5LjEwMAAAAAAAAAAAAAAA//tQwAAAAAAAAAAAAAAAAAAAAAAASW5mbwAAAA8AAAADAAAGhgBVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVWqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqr///////////////////////////////////////////8AAAAATGF2YzU4LjU0AAAAAAAAAAAAAAAAJAAAAAAAAAAAAoZxhxX2AAAAAAAAAAAAAAAAAAAA//tQxAAACVDlIgQwYgEjmWc/PCAAAFBHAAAAAAA0kBIAAAEkAAAAACEkBIAAAEkAAAAACQAAP/qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqr/+xDE1gPAAAGkAAAAIAAANIAAAASqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqg==',
+        captureSound: 'data:audio/mp3;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4LjI5LjEwMAAAAAAAAAAAAAAA//tQwAAAAAAAAAAAAAAAAAAAAAAASW5mbwAAAA8AAAADAAAGhgBVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVWqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqr///////////////////////////////////////////8AAAAATGF2YzU4LjU0AAAAAAAAAAAAAAAAJAAAAAAAAAAAAoZxhxX2AAAAAAAAAAAAAAAAAAAA//tQxAAACZjpQgQwYgEvnSn/PCAAAPgnAAAAAAAA0kAIAAAEkAAAAABpIAQAAAJIAAAAABIAAH/6qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqv/7EMTWg8AAAaQAAAAgAAA0gAAABKqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq'
+    };
+
+    const audio = new Audio();
+    audio.src = soundMap[move.captured ? 'captureSound' : 'moveSound'];
+    audio.play().catch(() => {
+        // Fallback sound handling if needed
+        const fallbackAudio = document.getElementById(move.captured ? 'captureSound' : 'moveSound');
+        if (fallbackAudio) fallbackAudio.play();
+    });
 }
 
 function minimax(depth, alpha, beta, isMaximizing) {
