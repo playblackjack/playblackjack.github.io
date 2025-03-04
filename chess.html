@@ -115,7 +115,8 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
-    <script>let board = null;
+    <script>
+let board = null;
 let game = new Chess();
 let difficulty = 1;
 let moveHistory = [];
@@ -123,15 +124,75 @@ let capturedPieces = { w: [], b: [] };
 let selectedSquare = null;
 let $board = $('#board');
 
-const positions = game.board();
-const currentPieces = { w: {}, b: {} };
+const pawnPositionWhite = [
+    [0,  0,  0,  0,  0,  0,  0,  0],
+    [50, 50, 50, 50, 50, 50, 50, 50],
+    [10, 10, 20, 30, 30, 20, 10, 10],
+    [5,  5, 10, 25, 25, 10,  5,  5],
+    [0,  0,  0, 20, 20,  0,  0,  0],
+    [5, -5,-10,  0,  0,-10, -5,  5],
+    [5, 10, 10,-20,-20, 10, 10,  5],
+    [0,  0,  0,  0,  0,  0,  0,  0]
+];
+
+const piecePositionWeights = {
+    'n': [
+        [-50,-40,-30,-30,-30,-30,-40,-50],
+        [-40,-20,  0,  0,  0,  0,-20,-40],
+        [-30,  0, 10, 15, 15, 10,  0,-30],
+        [-30,  5, 15, 20, 20, 15,  5,-30],
+        [-30,  0, 15, 20, 20, 15,  0,-30],
+        [-30,  5, 10, 15, 15, 10,  5,-30],
+        [-40,-20,  0,  5,  5,  0,-20,-40],
+        [-50,-40,-30,-30,-30,-30,-40,-50]
+    ],
+    'b': [
+        [-20,-10,-10,-10,-10,-10,-10,-20],
+        [-10,  0,  0,  0,  0,  0,  0,-10],
+        [-10,  0,  5, 10, 10,  5,  0,-10],
+        [-10,  5,  5, 10, 10,  5,  5,-10],
+        [-10,  0, 10, 10, 10, 10,  0,-10],
+        [-10, 10, 10, 10, 10, 10, 10,-10],
+        [-10,  5,  0,  0,  0,  0,  5,-10],
+        [-20,-10,-10,-10,-10,-10,-10,-20]
+    ],
+    'r': [
+        [0,  0,  0,  0,  0,  0,  0,  0],
+        [5, 10, 10, 10, 10, 10, 10,  5],
+        [-5,  0,  0,  0,  0,  0,  0, -5],
+        [-5,  0,  0,  0,  0,  0,  0, -5],
+        [-5,  0,  0,  0,  0,  0,  0, -5],
+        [-5,  0,  0,  0,  0,  0,  0, -5],
+        [-5,  0,  0,  0,  0,  0,  0, -5],
+        [0,  0,  0,  5,  5,  0,  0,  0]
+    ],
+    'q': [
+        [-20,-10,-10, -5, -5,-10,-10,-20],
+        [-10,  0,  0,  0,  0,  0,  0,-10],
+        [-10,  0,  5,  5,  5,  5,  0,-10],
+        [-5,  0,  5,  5,  5,  5,  0, -5],
+        [0,  0,  5,  5,  5,  5,  0, -5],
+        [-10,  5,  5,  5,  5,  5,  0,-10],
+        [-10,  0,  5,  0,  0,  0,  0,-10],
+        [-20,-10,-10, -5, -5,-10,-10,-20]
+    ],
+    'k': [
+        [-30,-40,-40,-50,-50,-40,-40,-30],
+        [-30,-40,-40,-50,-50,-40,-40,-30],
+        [-30,-40,-40,-50,-50,-40,-40,-30],
+        [-30,-40,-40,-50,-50,-40,-40,-30],
+        [-20,-30,-30,-40,-40,-30,-30,-20],
+        [-10,-20,-20,-20,-20,-20,-20,-10],
+        [20, 20,  0,  0,  0,  0, 20, 20],
+        [20, 30, 10,  0,  0, 10, 30, 20]
+    ]
+};
 
 function highlightLegalMoves(square) {
     const moves = game.moves({
         square: square,
         verbose: true
     });
-
     moves.forEach(move => {
         $board.find('.square-' + move.to).addClass('highlight-legal');
     });
@@ -143,15 +204,12 @@ function removeHighlights() {
 
 function onSquareClick(square) {
     removeHighlights();
-
-    // If we already have a piece selected
     if (selectedSquare !== null) {
         const move = game.move({
             from: selectedSquare,
             to: square,
             promotion: 'q'
         });
-
         if (move) {
             const isCapture = move.captured !== undefined;
             playSound(isCapture ? 'capture' : 'move');
@@ -161,12 +219,9 @@ function onSquareClick(square) {
             updateMoveHistory(game.history()[game.history().length - 1]);
             window.setTimeout(makeAIMove, 250);
         }
-
         selectedSquare = null;
         return;
     }
-
-    // Check if the clicked square has a piece that can be moved
     const piece = game.get(square);
     if (piece && piece.color === 'w' && game.turn() === 'w') {
         selectedSquare = square;
@@ -177,7 +232,6 @@ function onSquareClick(square) {
 function onDragStart(source, piece) {
     if (game.game_over()) return false;
     if (piece.search(/^b/) !== -1) return false;
-    
     highlightLegalMoves(source);
 }
 
@@ -187,7 +241,6 @@ function onDragMove() {
 
 function onDrop(source, target) {
     removeHighlights();
-
     const piece = game.get(source);
     const move = {
         from: source,
@@ -195,14 +248,9 @@ function onDrop(source, target) {
         promotion: 'q'
     };
 
-    // Handle pawn promotion
     if (piece && piece.type === 'p' && (target.charAt(1) === '8' || target.charAt(1) === '1')) {
         const promotionPiece = prompt('Choose promotion piece (q, r, n, b):', 'q');
-        if (!['q', 'r', 'n', 'b'].includes(promotionPiece)) {
-            move.promotion = 'q';
-        } else {
-            move.promotion = promotionPiece;
-        }
+        move.promotion = ['q', 'r', 'n', 'b'].includes(promotionPiece) ? promotionPiece : 'q';
     }
 
     const moveResult = game.move(move);
@@ -239,10 +287,7 @@ function updateCapturedPieces() {
         p: 8, r: 2, n: 2, b: 2, q: 1, k: 1
     };
 
-    capturedPieces = {
-        w: [],
-        b: []
-    };
+    capturedPieces = { w: [], b: [] };
 
     ['w', 'b'].forEach(color => {
         Object.entries(initialCounts).forEach(([piece, count]) => {
@@ -285,14 +330,20 @@ function updateMoveHistory(move) {
 }
 
 function makeAIMove() {
-    const moves = game.moves();
+    if (game.game_over()) return;
+
+    const moves = game.moves({ verbose: true });
     if (moves.length === 0) return;
 
     let bestMove = null;
     let bestValue = -Infinity;
     const depth = difficulty * 2;
 
-    moves.sort(() => Math.random() - 0.5);
+    moves.sort((a, b) => {
+        const aScore = (a.captured ? 10 : 0) + (a.san.includes('+') ? 5 : 0);
+        const bScore = (b.captured ? 10 : 0) + (b.san.includes('+') ? 5 : 0);
+        return bScore - aScore;
+    });
 
     for (const move of moves) {
         game.move(move);
@@ -305,9 +356,8 @@ function makeAIMove() {
         }
     }
 
-    game.move(bestMove);
-    const move = game.history({verbose: true})[game.history().length - 1];
-    const isCapture = move.captured !== undefined;
+    const moveResult = game.move(bestMove);
+    const isCapture = moveResult.captured !== undefined;
     playSound(isCapture ? 'capture' : 'move');
     
     board.position(game.fen());
@@ -348,7 +398,10 @@ function evaluateBoard() {
     if (game.in_checkmate()) {
         return game.turn() === 'w' ? -9999 : 9999;
     }
-    
+    if (game.in_draw() || game.in_stalemate() || game.in_threefold_repetition()) {
+        return 0;
+    }
+
     let value = 0;
     const pieceValues = {
         'p': 100,
@@ -372,13 +425,25 @@ function evaluateBoard() {
                     pieceValue += piece.color === 'w' ? 
                         pawnPositionWhite[7-j][i] : 
                         pawnPositionWhite[j][i];
+                } else if (piecePositionWeights[piece.type]) {
+                    pieceValue += piece.color === 'w' ? 
+                        piecePositionWeights[piece.type][7-j][i] : 
+                        piecePositionWeights[piece.type][j][i];
+                }
+                
+                if ((i === 3 || i === 4) && (j === 3 || j === 4)) {
+                    pieceValue += 30;
                 }
                 
                 value += piece.color === 'w' ? pieceValue : -pieceValue;
             }
         }
     }
-    
+
+    if (game.in_check()) {
+        value += game.turn() === 'w' ? -50 : 50;
+    }
+
     return value;
 }
 
@@ -431,6 +496,7 @@ style.textContent = `
 `;
 document.head.appendChild(style);
 
+// Initialize the game when document is ready
 $(document).ready(function() {
     initGame();
     
@@ -442,7 +508,6 @@ $(document).ready(function() {
         initGame();
     });
 });
-
 </script>
 </body>
 </html>
