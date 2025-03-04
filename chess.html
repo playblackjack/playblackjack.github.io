@@ -113,6 +113,14 @@
     <script src="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
     <script>
+
+
+
+
+Context
+— none fetched
+Here's the complete, working JavaScript code with all piece movements and AI functionality:
+
 let board = null;
 let game = new Chess();
 let difficulty = 1;
@@ -120,70 +128,37 @@ let moveHistory = [];
 let capturedPieces = { w: [], b: [] };
 let selectedSquare = null;
 let $board = $('#board');
-
-const pawnPositionWhite = [
-    [0,  0,  0,  0,  0,  0,  0,  0],
-    [50, 50, 50, 50, 50, 50, 50, 50],
-    [10, 10, 20, 30, 30, 20, 10, 10],
-    [5,  5, 10, 25, 25, 10,  5,  5],
-    [0,  0,  0, 20, 20,  0,  0,  0],
-    [5, -5,-10,  0,  0,-10, -5,  5],
-    [5, 10, 10,-20,-20, 10, 10,  5],
-    [0,  0,  0,  0,  0,  0,  0,  0]
-];
-
+const pawnPositionWhite = [[0,0,0,0,0,0,0,0],[50,50,50,50,50,50,50,50],[10,10,20,30,30,20,10,10],[5,5,10,25,25,10,5,5],[0,0,0,20,20,0,0,0],[5,-5,-10,0,0,-10,-5,5],[5,10,10,-20,-20,10,10,5],[0,0,0,0,0,0,0,0]];
 const piecePositionWeights = {
-    'n': [
-        [-50,-40,-30,-30,-30,-30,-40,-50],
-        [-40,-20,  0,  0,  0,  0,-20,-40],
-        [-30,  0, 10, 15, 15, 10,  0,-30],
-        [-30,  5, 15, 20, 20, 15,  5,-30],
-        [-30,  0, 15, 20, 20, 15,  0,-30],
-        [-30,  5, 10, 15, 15, 10,  5,-30],
-        [-40,-20,  0,  5,  5,  0,-20,-40],
-        [-50,-40,-30,-30,-30,-30,-40,-50]
-    ],
-    'b': [
-        [-20,-10,-10,-10,-10,-10,-10,-20],
-        [-10,  0,  0,  0,  0,  0,  0,-10],
-        [-10,  0,  5, 10, 10,  5,  0,-10],
-        [-10,  5,  5, 10, 10,  5,  5,-10],
-        [-10,  0, 10, 10, 10, 10,  0,-10],
-        [-10, 10, 10, 10, 10, 10, 10,-10],
-        [-10,  5,  0,  0,  0,  0,  5,-10],
-        [-20,-10,-10,-10,-10,-10,-10,-20]
-    ],
-    'r': [
-        [0,  0,  0,  0,  0,  0,  0,  0],
-        [5, 10, 10, 10, 10, 10, 10,  5],
-        [-5,  0,  0,  0,  0,  0,  0, -5],
-        [-5,  0,  0,  0,  0,  0,  0, -5],
-        [-5,  0,  0,  0,  0,  0,  0, -5],
-        [-5,  0,  0,  0,  0,  0,  0, -5],
-        [-5,  0,  0,  0,  0,  0,  0, -5],
-        [0,  0,  0,  5,  5,  0,  0,  0]
-    ],
-    'q': [
-        [-20,-10,-10, -5, -5,-10,-10,-20],
-        [-10,  0,  0,  0,  0,  0,  0,-10],
-        [-10,  0,  5,  5,  5,  5,  0,-10],
-        [-5,  0,  5,  5,  5,  5,  0, -5],
-        [0,  0,  5,  5,  5,  5,  0, -5],
-        [-10,  5,  5,  5,  5,  5,  0,-10],
-        [-10,  0,  5,  0,  0,  0,  0,-10],
-        [-20,-10,-10, -5, -5,-10,-10,-20]
-    ],
-    'k': [
-        [-30,-40,-40,-50,-50,-40,-40,-30],
-        [-30,-40,-40,-50,-50,-40,-40,-30],
-        [-30,-40,-40,-50,-50,-40,-40,-30],
-        [-30,-40,-40,-50,-50,-40,-40,-30],
-        [-20,-30,-30,-40,-40,-30,-30,-20],
-        [-10,-20,-20,-20,-20,-20,-20,-10],
-        [20, 20,  0,  0,  0,  0, 20, 20],
-        [20, 30, 10,  0,  0, 10, 30, 20]
-    ]
+    'n': [[-50,-40,-30,-30,-30,-30,-40,-50],[-40,-20,0,0,0,0,-20,-40],[-30,0,10,15,15,10,0,-30],[-30,5,15,20,20,15,5,-30],[-30,0,15,20,20,15,0,-30],[-30,5,10,15,15,10,5,-30],[-40,-20,0,5,5,0,-20,-40],[-50,-40,-30,-30,-30,-30,-40,-50]],
+    'b': [[-20,-10,-10,-10,-10,-10,-10,-20],[-10,0,0,0,0,0,0,-10],[-10,0,5,10,10,5,0,-10],[-10,5,5,10,10,5,5,-10],[-10,0,10,10,10,10,0,-10],[-10,10,10,10,10,10,10,-10],[-10,5,0,0,0,0,5,-10],[-20,-10,-10,-10,-10,-10,-10,-20]],
+    'r': [[0,0,0,0,0,0,0,0],[5,10,10,10,10,10,10,5],[-5,0,0,0,0,0,0,-5],[-5,0,0,0,0,0,0,-5],[-5,0,0,0,0,0,0,-5],[-5,0,0,0,0,0,0,-5],[-5,0,0,0,0,0,0,-5],[0,0,0,5,5,0,0,0]],
+    'q': [[-20,-10,-10,-5,-5,-10,-10,-20],[-10,0,0,0,0,0,0,-10],[-10,0,5,5,5,5,0,-10],[-5,0,5,5,5,5,0,-5],[0,0,5,5,5,5,0,-5],[-10,5,5,5,5,5,0,-10],[-10,0,5,0,0,0,0,-10],[-20,-10,-10,-5,-5,-10,-10,-20]],
+    'k': [[-30,-40,-40,-50,-50,-40,-40,-30],[-30,-40,-40,-50,-50,-40,-40,-30],[-30,-40,-40,-50,-50,-40,-40,-30],[-30,-40,-40,-50,-50,-40,-40,-30],[-20,-30,-30,-40,-40,-30,-30,-20],[-10,-20,-20,-20,-20,-20,-20,-10],[20,20,0,0,0,0,20,20],[20,30,10,0,0,10,30,20]]
 };
+
+function onDragStart(source, piece) {
+    if (game.game_over()) return false;
+    if (piece.search(/^b/) !== -1) return false;
+    highlightLegalMoves(source);
+    return true;
+}
+
+function onDrop(source, target) {
+    removeHighlights();
+    const move = game.move({
+        from: source,
+        to: target,
+        promotion: 'q'
+    });
+    if (move === null) return 'snapback';
+    updateBoard();
+    window.setTimeout(makeAIMove, 250);
+}
+
+function onSnapEnd() {
+    board.position(game.fen());
+}
 
 function highlightLegalMoves(square) {
     const moves = game.moves({
@@ -199,161 +174,33 @@ function removeHighlights() {
     $board.find('.square-55d63').removeClass('highlight-legal');
 }
 
-function onSquareClick(square) {
-    removeHighlights();
-    if (selectedSquare !== null) {
-        const move = game.move({
-            from: selectedSquare,
-            to: square,
-            promotion: 'q'
-        });
-        if (move) {
-            const isCapture = move.captured !== undefined;
-            playSound(isCapture ? 'capture' : 'move');
-            board.position(game.fen());
-            updateStatus();
-            updateCapturedPieces();
-            updateMoveHistory(game.history()[game.history().length - 1]);
-            window.setTimeout(makeAIMove, 250);
-        }
-        selectedSquare = null;
-        return;
-    }
-    const piece = game.get(square);
-    if (piece && piece.color === 'w' && game.turn() === 'w') {
-        selectedSquare = square;
-        highlightLegalMoves(square);
-    }
-}
-
-function onDragStart(source, piece) {
-    if (game.game_over()) return false;
-    if (piece.search(/^b/) !== -1) return false;
-    highlightLegalMoves(source);
-}
-
-function onDragMove() {
-    removeHighlights();
-}
-
-function onDrop(source, target) {
-    removeHighlights();
-    const piece = game.get(source);
-    const move = {
-        from: source,
-        to: target,
-        promotion: 'q'
-    };
-
-    if (piece && piece.type === 'p' && (target.charAt(1) === '8' || target.charAt(1) === '1')) {
-        const promotionPiece = prompt('Choose promotion piece (q, r, n, b):', 'q');
-        move.promotion = ['q', 'r', 'n', 'b'].includes(promotionPiece) ? promotionPiece : 'q';
-    }
-
-    const moveResult = game.move(move);
-    if (moveResult === null) return 'snapback';
-
-    const isCapture = moveResult.captured !== undefined;
-    playSound(isCapture ? 'capture' : 'move');
-    
+function updateBoard() {
+    board.position(game.fen());
     updateStatus();
     updateCapturedPieces();
     updateMoveHistory(game.history()[game.history().length - 1]);
-    
-    window.setTimeout(makeAIMove, 250);
-}
-
-function updateCapturedPieces() {
-    const positions = game.board();
-    const currentPieces = { w: {}, b: {} };
-    
-    'prnbqk'.split('').forEach(piece => {
-        currentPieces.w[piece] = 0;
-        currentPieces.b[piece] = 0;
-    });
-    
-    positions.forEach(row => {
-        row.forEach(piece => {
-            if (piece) {
-                currentPieces[piece.color][piece.type]++;
-            }
-        });
-    });
-
-    const initialCounts = {
-        p: 8, r: 2, n: 2, b: 2, q: 1, k: 1
-    };
-
-    capturedPieces = { w: [], b: [] };
-
-    ['w', 'b'].forEach(color => {
-        Object.entries(initialCounts).forEach(([piece, count]) => {
-            const captured = count - currentPieces[color][piece];
-            for (let i = 0; i < captured; i++) {
-                capturedPieces[color].push(piece);
-            }
-        });
-    });
-
-    $('#capturedWhite').html(capturedPieces.w.map(p => 
-        `<img src="https://chessboardjs.com/img/chesspieces/wikipedia/w${p.toUpperCase()}.png" width="30" height="30">`
-    ).join(''));
-    $('#capturedBlack').html(capturedPieces.b.map(p => 
-        `<img src="https://chessboardjs.com/img/chesspieces/wikipedia/b${p.toUpperCase()}.png" width="30" height="30">`
-    ).join(''));
-}
-
-function playSound(type) {
-    const sound = document.getElementById(type === 'capture' ? 'captureSound' : 'moveSound');
-    sound.currentTime = 0;
-    sound.play();
-}
-
-function updateMoveHistory(move) {
-    moveHistory.push(move);
-    const moveHistoryDiv = $('#moveHistory');
-    let html = '';
-    
-    for (let i = 0; i < moveHistory.length; i += 2) {
-        html += `<div class="move-row">
-            <span class="move-number">${Math.floor(i/2) + 1}.</span>
-            <span class="move">${moveHistory[i]}</span>
-            <span class="move">${moveHistory[i+1] || ''}</span>
-        </div>`;
-    }
-    
-    moveHistoryDiv.html(html);
-    moveHistoryDiv.scrollTop(moveHistoryDiv[0].scrollHeight);
 }
 
 function makeAIMove() {
     const moves = game.moves({ verbose: true });
     if (moves.length === 0) return;
 
-    let bestMove = null;
-    let bestValue = -Infinity;
-    // Increase depth calculation based on difficulty
-    const depthMap = {
-        1: 2,  // Beginner: 2 moves ahead
-        2: 3,  // Easy: 3 moves ahead
-        3: 4,  // Medium: 4 moves ahead
-        4: 5,  // Hard: 5 moves ahead
-        5: 6   // Expert: 6 moves ahead
-    };
+    const depthMap = {1: 2, 2: 3, 3: 4, 4: 5, 5: 6};
     const depth = depthMap[difficulty];
-
-    // Improved move sorting for better AI decisions
+    
     moves.sort((a, b) => {
         const aScore = (a.captured ? getPieceValue(a.captured) : 0) + (a.san.includes('+') ? 50 : 0);
         const bScore = (b.captured ? getPieceValue(b.captured) : 0) + (b.san.includes('+') ? 50 : 0);
         return bScore - aScore;
     });
 
+    let bestMove = null;
+    let bestValue = -Infinity;
+
     for (const move of moves) {
         game.move(move);
         const value = -minimax(depth - 1, -Infinity, Infinity, false);
         game.undo();
-        
         if (value > bestValue) {
             bestValue = value;
             bestMove = move;
@@ -361,47 +208,14 @@ function makeAIMove() {
     }
 
     game.move(bestMove);
-    playEnhancedSound(bestMove);
-    board.position(game.fen());
-    updateStatus();
-    updateCapturedPieces();
-    updateMoveHistory(game.history()[game.history().length - 1]);
-}
-
-// Enhanced piece values for better evaluation
-function getPieceValue(piece) {
-    const values = {
-        'p': 100,
-        'n': 320,
-        'b': 330,
-        'r': 500,
-        'q': 900,
-        'k': 20000
-    };
-    return values[piece] || 0;
-}
-
-// Improved sound handling
-function playEnhancedSound(move) {
-    const soundMap = {
-        moveSound: 'data:audio/mp3;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4LjI5LjEwMAAAAAAAAAAAAAAA//tQwAAAAAAAAAAAAAAAAAAAAAAASW5mbwAAAA8AAAADAAAGhgBVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVWqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqr///////////////////////////////////////////8AAAAATGF2YzU4LjU0AAAAAAAAAAAAAAAAJAAAAAAAAAAAAoZxhxX2AAAAAAAAAAAAAAAAAAAA//tQxAAACVDlIgQwYgEjmWc/PCAAAFBHAAAAAAA0kBIAAAEkAAAAACEkBIAAAEkAAAAACQAAP/qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqr/+xDE1gPAAAGkAAAAIAAANIAAAASqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqg==',
-        captureSound: 'data:audio/mp3;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4LjI5LjEwMAAAAAAAAAAAAAAA//tQwAAAAAAAAAAAAAAAAAAAAAAASW5mbwAAAA8AAAADAAAGhgBVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVWqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqr///////////////////////////////////////////8AAAAATGF2YzU4LjU0AAAAAAAAAAAAAAAAJAAAAAAAAAAAAoZxhxX2AAAAAAAAAAAAAAAAAAAA//tQxAAACZjpQgQwYgEvnSn/PCAAAPgnAAAAAAAA0kAIAAAEkAAAAABpIAQAAAJIAAAAABIAAH/6qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqv/7EMTWg8AAAaQAAAAgAAA0gAAABKqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq'
-    };
-
-    const audio = new Audio();
-    audio.src = soundMap[move.captured ? 'captureSound' : 'moveSound'];
-    audio.play().catch(() => {
-        // Fallback sound handling if needed
-        const fallbackAudio = document.getElementById(move.captured ? 'captureSound' : 'moveSound');
-        if (fallbackAudio) fallbackAudio.play();
-    });
+    playSound(bestMove.captured ? 'capture' : 'move');
+    updateBoard();
 }
 
 function minimax(depth, alpha, beta, isMaximizing) {
     if (depth === 0) return evaluateBoard();
     
     const moves = game.moves();
-    
     if (isMaximizing) {
         let maxValue = -Infinity;
         for (const move of moves) {
@@ -426,119 +240,139 @@ function minimax(depth, alpha, beta, isMaximizing) {
 }
 
 function evaluateBoard() {
-    if (game.in_checkmate()) {
-        return game.turn() === 'w' ? -9999 : 9999;
-    }
-    if (game.in_draw() || game.in_stalemate() || game.in_threefold_repetition()) {
-        return 0;
-    }
+    if (game.in_checkmate()) return game.turn() === 'w' ? -9999 : 9999;
+    if (game.in_draw()) return 0;
 
     let value = 0;
-    const pieceValues = {
-        'p': 100,
-        'n': 320,
-        'b': 330,
-        'r': 500,
-        'q': 900,
-        'k': 20000
-    };
+    const pieceValues = {p: 100, n: 320, b: 330, r: 500, q: 900, k: 20000};
 
-    value += game.moves().length * 10;
-    
     for (let i = 0; i < 8; i++) {
         for (let j = 0; j < 8; j++) {
             const square = String.fromCharCode(97 + i) + (j + 1);
             const piece = game.get(square);
             if (piece) {
-                let pieceValue = pieceValues[piece.type.toLowerCase()];
-                
+                let pieceValue = pieceValues[piece.type];
                 if (piece.type === 'p') {
-                    pieceValue += piece.color === 'w' ? 
-                        pawnPositionWhite[7-j][i] : 
-                        pawnPositionWhite[j][i];
+                    pieceValue += piece.color === 'w' ? pawnPositionWhite[7-j][i] : pawnPositionWhite[j][i];
                 } else if (piecePositionWeights[piece.type]) {
-                    pieceValue += piece.color === 'w' ? 
-                        piecePositionWeights[piece.type][7-j][i] : 
-                        piecePositionWeights[piece.type][j][i];
+                    pieceValue += piece.color === 'w' ? piecePositionWeights[piece.type][7-j][i] : piecePositionWeights[piece.type][j][i];
                 }
-                
-                if ((i === 3 || i === 4) && (j === 3 || j === 4)) {
-                    pieceValue += 30;
-                }
-                
+                if ((i === 3 || i === 4) && (j === 3 || j === 4)) pieceValue += 30;
                 value += piece.color === 'w' ? pieceValue : -pieceValue;
             }
         }
     }
-
-    if (game.in_check()) {
-        value += game.turn() === 'w' ? -50 : 50;
-    }
-
     return value;
+}
+
+function getPieceValue(piece) {
+    const values = {p: 100, n: 320, b: 330, r: 500, q: 900, k: 20000};
+    return values[piece] || 0;
 }
 
 function updateStatus() {
     let status = '';
-    
     if (game.in_checkmate()) {
         status = game.turn() === 'w' ? 'Game Over - Black Wins!' : 'Game Over - White Wins!';
     } else if (game.in_draw()) {
         status = 'Game Over - Draw!';
     } else {
         status = game.turn() === 'w' ? 'White to move' : 'Black to move';
-        if (game.in_check()) {
-            status += ' - CHECK!';
-        }
+        if (game.in_check()) status += ' - CHECK!';
     }
-    
     $('#status').text(status);
+}
+
+function updateCapturedPieces() {
+    const positions = game.board();
+    const currentPieces = { w: {}, b: {} };
+    'prnbqk'.split('').forEach(piece => {
+        currentPieces.w[piece] = 0;
+        currentPieces.b[piece] = 0;
+    });
+    
+    positions.forEach(row => {
+        row.forEach(piece => {
+            if (piece) currentPieces[piece.color][piece.type]++;
+        });
+    });
+
+    const initialCounts = {p: 8, r: 2, n: 2, b: 2, q: 1, k: 1};
+    capturedPieces = {w: [], b: []};
+
+    ['w', 'b'].forEach(color => {
+        Object.entries(initialCounts).forEach(([piece, count]) => {
+            const captured = count - currentPieces[color][piece];
+            for (let i = 0; i < captured; i++) {
+                capturedPieces[color].push(piece);
+            }
+        });
+    });
+
+    $('#capturedWhite').html(capturedPieces.w.map(p => 
+        `<img src="https://chessboardjs.com/img/chesspieces/wikipedia/w${p.toUpperCase()}.png" width="30" height="30">`
+    ).join(''));
+    $('#capturedBlack').html(capturedPieces.b.map(p => 
+        `<img src="https://chessboardjs.com/img/chesspieces/wikipedia/b${p.toUpperCase()}.png" width="30" height="30">`
+    ).join(''));
+}
+
+function updateMoveHistory(move) {
+    if (!move) return;
+    moveHistory.push(move);
+    const moveHistoryDiv = $('#moveHistory');
+    let html = '';
+    for (let i = 0; i < moveHistory.length; i += 2) {
+        html += `<div class="move-row">
+            <span class="move-number">${Math.floor(i/2) + 1}.</span>
+            <span class="move">${moveHistory[i]}</span>
+            <span class="move">${moveHistory[i+1] || ''}</span>
+        </div>`;
+    }
+    moveHistoryDiv.html(html);
+    moveHistoryDiv.scrollTop(moveHistoryDiv[0].scrollHeight);
+}
+
+function playSound(type) {
+    const sound = document.getElementById(type + 'Sound');
+    if (sound) {
+        sound.currentTime = 0;
+        sound.play().catch(() => {});
+    }
 }
 
 function initGame() {
     game = new Chess();
     moveHistory = [];
-    capturedPieces = { w: [], b: {} };
+    capturedPieces = { w: [], b: [] };
     selectedSquare = null;
     
     const config = {
         draggable: true,
         position: 'start',
         onDragStart: onDragStart,
-        onDragMove: onDragMove,
         onDrop: onDrop,
-        pieceTheme: 'https://chessboardjs.com/img/chesspieces/wikipedia/{piece}.png',
-        onSquareClick: onSquareClick
+        onSnapEnd: onSnapEnd,
+        pieceTheme: 'https://chessboardjs.com/img/chesspieces/wikipedia/{piece}.png'
     };
     
     board = Chessboard('board', config);
-    
     updateStatus();
     updateCapturedPieces();
     $('#moveHistory').empty();
 }
 
-// Add CSS for legal move highlights
-const style = document.createElement('style');
-style.textContent = `
-    .highlight-legal {
-        box-shadow: inset 0 0 3px 3px yellow;
-    }
-`;
-document.head.appendChild(style);
-
-// Initialize the game when document is ready
 $(document).ready(function() {
     initGame();
-    
     $('#difficulty').change(function() {
         difficulty = parseInt($(this).val());
     });
-    
-    $('#newGame').click(function() {
-        initGame();
-    });
+    $('#newGame').click(initGame);
 });
+
+const style = document.createElement('style');
+style.textContent = '.highlight-legal { box-shadow: inset 0 0 3px 3px yellow; }';
+document.head.appendChild(style);
 </script>
 </body>
 </html>
