@@ -156,25 +156,42 @@ function playSound(type) {
 
 function updateCapturedPieces() {
     const positions = game.board();
-    const currentPieces = { w: [], b: [] };
+    const currentPieces = { w: {}, b: {} };
     
+    // Initialize piece counts
+    'prnbqk'.split('').forEach(piece => {
+        currentPieces.w[piece] = 0;
+        currentPieces.b[piece] = 0;
+    });
+    
+    // Count current pieces on board
     positions.forEach(row => {
         row.forEach(piece => {
             if (piece) {
-                currentPieces[piece.color].push(piece.type);
+                currentPieces[piece.color][piece.type]++;
             }
         });
     });
 
-    const initialPieces = {
-        w: ['p','p','p','p','p','p','p','p','r','n','b','q','k','b','n','r'],
-        b: ['p','p','p','p','p','p','p','p','r','n','b','q','k','b','n','r']
+    // Initial piece counts
+    const initialCounts = {
+        p: 8, r: 2, n: 2, b: 2, q: 1, k: 1
     };
 
+    // Calculate actual captured pieces
     capturedPieces = {
-        w: initialPieces.w.filter(p => currentPieces.w.filter(cp => cp === p).length < initialPieces.w.filter(ip => ip === p).length),
-        b: initialPieces.b.filter(p => currentPieces.b.filter(cp => cp === p).length < initialPieces.b.filter(ip => ip === p).length)
+        w: [],
+        b: []
     };
+
+    ['w', 'b'].forEach(color => {
+        Object.entries(initialCounts).forEach(([piece, count]) => {
+            const captured = count - currentPieces[color][piece];
+            for (let i = 0; i < captured; i++) {
+                capturedPieces[color].push(piece);
+            }
+        });
+    });
 
     $('#capturedWhite').html(capturedPieces.w.map(p => 
         `<img src="https://chessboardjs.com/img/chesspieces/wikipedia/w${p.toUpperCase()}.png" width="30" height="30">`
@@ -183,7 +200,6 @@ function updateCapturedPieces() {
         `<img src="https://chessboardjs.com/img/chesspieces/wikipedia/b${p.toUpperCase()}.png" width="30" height="30">`
     ).join(''));
 }
-
 function updateMoveHistory(move) {
     moveHistory.push(move);
     const moveHistoryDiv = $('#moveHistory');
