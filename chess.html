@@ -121,6 +121,15 @@ let capturedPieces = { w: [], b: [] };
 let selectedSquare = null;
 let $board = $('#board');
 
+const pieceImportance = {
+    'p': 1,    
+    'n': 1.2,  
+    'b': 1.2,  
+    'r': 1.5,  
+    'q': 2.0,  
+    'k': 3.0   
+};
+
 const openingBook = {
     'start': ['e4', 'd4', 'Nf3', 'c4', 'b3', 'g3', 'f4', 'b4'],
 
@@ -160,6 +169,7 @@ const openingBook = {
     'f4 d5': ['Nf3', 'e3', 'g3', 'b3', 'c4', 'Nc3']
 };
 
+
 const pawnPositionWhite = [
     [0,0,0,0,0,0,0,0],
     [50,50,50,50,50,50,50,50],
@@ -179,10 +189,31 @@ const piecePositionWeights = {
     'k': [[-30,-40,-40,-50,-50,-40,-40,-30],[-30,-40,-40,-50,-50,-40,-40,-30],[-30,-40,-40,-50,-50,-40,-40,-30],[-30,-40,-40,-50,-50,-40,-40,-30],[-20,-30,-30,-40,-40,-30,-30,-20],[-10,-20,-20,-20,-20,-20,-20,-10],[20,20,0,0,0,0,20,20],[20,30,10,0,0,10,30,20]]
 };
 
+function onSquareClick(square) {
+    removeHighlights();
+    if (selectedSquare !== null) {
+        const move = game.move({
+            from: selectedSquare,
+            to: square,
+            promotion: 'q'
+        });
+        if (move) {
+            updateBoard();
+            window.setTimeout(makeAIMove, 250);
+        }
+        selectedSquare = null;
+        return;
+    }
+    const piece = game.get(square);
+    if (piece && piece.color === 'w' && game.turn() === 'w') {
+        selectedSquare = square;
+        highlightLegalMoves(square);
+    }
+}
+
 function isProtected(square) {
     const piece = game.get(square);
     if (!piece) return false;
-    
     const defenders = [];
     game.moves({ verbose: true }).forEach(move => {
         if (move.to === square && game.get(move.from).color === piece.color) {
@@ -196,7 +227,6 @@ function makeAIMove() {
     const moves = game.moves({ verbose: true });
     if (moves.length === 0) return;
 
-    // Check opening book
     const gameHistory = game.history().join(' ');
     const bookMoves = openingBook[gameHistory] || openingBook['start'];
     
@@ -291,20 +321,86 @@ function evaluateBoard() {
             const square = String.fromCharCode(97 + i) + (j + 1);
             const piece = game.get(square);
             if (piece) {
-                let pieceValue = pieceValues[piece.type];
+                let pieceValue = pieceValues[piece.type] * pieceImportance[piece.type];
+                
+                if (['q', 'r'].includes(piece.type)) {
+                    if (isProtected(square)) {
+                        pieceValue += 50;
+                    } else {
+                        pieceValue -= 30;
+                    }
+                }
+
+                if (piece.type === 'k') {
+                    pieceValue += evaluateKingSafety(square, piece.color);
+                }
+
                 if (piece.type === 'p') {
                     pieceValue += piece.color === 'w' ? pawnPositionWhite[7-j][i] : pawnPositionWhite[j][i];
                 } else if (piecePositionWeights[piece.type]) {
                     pieceValue += piece.color === 'w' ? piecePositionWeights[piece.type][7-j][i] : piecePositionWeights[piece.type][j][i];
                 }
-                if ((i === 3 || i === 4) && (j === 3 || j === 4)) pieceValue += 30;
+                
                 value += piece.color === 'w' ? pieceValue : -pieceValue;
             }
         }
     }
     return value;
 }
-        function getPieceValue(piece) {
+
+function evaluateKingSafety(square, color) {
+    let safety = 0;
+    const pawnShield = countPawnShield(square, color);
+    safety += pawnShield * 30;
+    const protectingPieces = countProtectingPieces(square, color);
+    safety += protectingPieces * 20;
+    if (hasCastled(color)) {
+        safety += 150;
+    }
+    return safety;
+}
+
+function countPawnShield(square, color) {
+    const file = square.charCodeAt(0) - 97;
+    const rank = parseInt(square.charAt(1));
+    let count = 0;
+    const direction = color === 'w' ? 1 : -1;
+    const checkRanks = [rank + direction, rank + (direction * 2)];
+    const checkFiles = [file - 1, file, file + 1];
+
+    checkFiles.forEach(f => {
+        if (f >= 0 && f < 8) {
+            checkRanks.forEach(r => {
+                if (r >= 1 && r <= 8) {
+                    const checkSquare = String.fromCharCode(f + 97) + r;
+                    const piece = game.get(checkSquare);
+                    if (piece && piece.type === 'p' && piece.color === color) {
+                        count++;
+                    }
+                }
+            });
+        }
+    });
+    return count;
+}
+
+function countProtectingPieces(square, color) {
+    let count = 0;
+    const moves = game.moves({ verbose: true });
+    moves.forEach(move => {
+        if (move.to === square && game.get(move.from).color === color) {
+            count++;
+        }
+    });
+    return count;
+}
+
+function hasCastled(color) {
+    const history = game.history();
+    return history.some(move => move.includes('O-O') || move.includes('O-O-O'));
+}
+
+function getPieceValue(piece) {
     const values = {p: 100, n: 320, b: 330, r: 500, q: 900, k: 20000};
     return values[piece] || 0;
 }
@@ -333,7 +429,7 @@ function updateCapturedPieces() {
     positions.forEach(row => {
         row.forEach(piece => {
             if (piece) currentPieces[piece.color][piece.type]++;
-        });
+                    });
     });
 
     const initialCounts = {p: 8, r: 2, n: 2, b: 2, q: 1, k: 1};
@@ -380,34 +476,6 @@ function playSound(type) {
     }
 }
 
-        function onSquareClick(square) {
-    removeHighlights();
-    
-    // If we already have a selected square
-    if (selectedSquare !== null) {
-        // Try to make the move
-        const move = game.move({
-            from: selectedSquare,
-            to: square,
-            promotion: 'q'
-        });
-
-        if (move) {
-            updateBoard();
-            window.setTimeout(makeAIMove, 250);
-        }
-        selectedSquare = null;
-        return;
-    }
-
-    // First click - select the piece if it's white's turn
-    const piece = game.get(square);
-    if (piece && piece.color === 'w' && game.turn() === 'w') {
-        selectedSquare = square;
-        highlightLegalMoves(square);
-    }
-}
-        
 function onDragStart(source, piece) {
     if (game.game_over()) return false;
     if (piece.search(/^b/) !== -1) return false;
@@ -458,15 +526,15 @@ function initGame() {
     capturedPieces = { w: [], b: [] };
     selectedSquare = null;
     
-const config = {
-    draggable: true,
-    position: 'start',
-    onDragStart: onDragStart,
-    onDrop: onDrop,
-    onSnapEnd: onSnapEnd,
-    onSquareClick: onSquareClick,
-    pieceTheme: 'https://chessboardjs.com/img/chesspieces/wikipedia/{piece}.png'
-};
+    const config = {
+        draggable: true,
+        position: 'start',
+        onDragStart: onDragStart,
+        onDrop: onDrop,
+        onSnapEnd: onSnapEnd,
+        onSquareClick: onSquareClick,
+        pieceTheme: 'https://chessboardjs.com/img/chesspieces/wikipedia/{piece}.png'
+    };
     
     board = Chessboard('board', config);
     updateStatus();
@@ -485,6 +553,7 @@ $(document).ready(function() {
 const style = document.createElement('style');
 style.textContent = '.highlight-legal { box-shadow: inset 0 0 3px 3px yellow; }';
 document.head.appendChild(style);
+
 </script>
 </body>
 </html>
