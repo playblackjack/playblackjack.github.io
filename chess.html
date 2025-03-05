@@ -120,7 +120,57 @@ let moveHistory = [];
 let capturedPieces = { w: [], b: [] };
 let selectedSquare = null;
 let $board = $('#board');
-const pawnPositionWhite = [[0,0,0,0,0,0,0,0],[50,50,50,50,50,50,50,50],[10,10,20,30,30,20,10,10],[5,5,10,25,25,10,5,5],[0,0,0,20,20,0,0,0],[5,-5,-10,0,0,-10,-5,5],[5,10,10,-20,-20,10,10,5],[0,0,0,0,0,0,0,0]];
+
+const openingBook = {
+    'start': ['e4', 'd4', 'Nf3', 'c4', 'b3', 'g3', 'f4', 'b4'],
+
+    // e4 lines
+    'e4': ['e5', 'c5', 'e6', 'c6', 'd6', 'g6', 'b6', 'Nf6', 'd5', 'a6'],
+    'e4 e5': ['Nf3', 'Bc4', 'Nc3', 'd4', 'f4', 'c3'],
+    'e4 e5 Nf3': ['Nc6', 'Nf6', 'd6', 'f5', 'Bc5', 'f6'],
+    'e4 c5': ['Nf3', 'Nc3', 'c3', 'b4', 'g3', 'f4'],
+    'e4 c5 Nf3': ['d6', 'Nc6', 'e6', 'g6', 'a6', 'Nf6'],
+    'e4 e6': ['d4', 'Nc3', 'Nf3', 'c4', 'g3', 'f4'],
+    'e4 c6': ['d4', 'Nc3', 'Nf3', 'Bc4', 'b3', 'c4'],
+
+    // d4 lines
+    'd4': ['d5', 'Nf6', 'f5', 'e6', 'c5', 'g6', 'b6', 'd6'],
+    'd4 d5': ['c4', 'Nf3', 'e3', 'Bf4', 'g3', 'e4'],
+    'd4 d5 c4': ['e6', 'c6', 'dxc4', 'Nf6', 'g6', 'e5'],
+    'd4 Nf6': ['c4', 'Nf3', 'Bg5', 'g3', 'e3', 'Nc3'],
+    'd4 Nf6 c4': ['e6', 'g6', 'c5', 'd5', 'b6', 'e5'],
+
+    // Nf3 lines
+    'Nf3': ['d5', 'Nf6', 'c5', 'g6', 'f5', 'b6', 'e6', 'c6'],
+    'Nf3 d5': ['g3', 'd4', 'c4', 'e3', 'b3', 'Nc3'],
+    'Nf3 Nf6': ['c4', 'g3', 'd4', 'b3', 'Rg1', 'e3'],
+    
+    // c4 lines
+    'c4': ['e5', 'c5', 'Nf6', 'e6', 'g6', 'c6', 'b6', 'd5'],
+    'c4 e5': ['Nc3', 'g3', 'Nf3', 'e3', 'e4', 'b3'],
+    'c4 c5': ['Nf3', 'Nc3', 'g3', 'e3', 'e4', 'b3'],
+    'c4 Nf6': ['Nc3', 'g3', 'Nf3', 'd4', 'b3', 'e4'],
+
+    // Additional lines
+    'b3': ['e5', 'd5', 'Nf6', 'c5', 'g6', 'b6'],
+    'b3 e5': ['Bb2', 'e3', 'Nf3', 'g3', 'c4', 'Nc3'],
+    'g3': ['d5', 'e5', 'c5', 'Nf6', 'g6', 'b6'],
+    'g3 d5': ['Bg2', 'Nf3', 'c4', 'd4', 'b3', 'e4'],
+    'f4': ['d5', 'e5', 'Nf6', 'c5', 'g6', 'e6'],
+    'f4 d5': ['Nf3', 'e3', 'g3', 'b3', 'c4', 'Nc3']
+};
+
+const pawnPositionWhite = [
+    [0,0,0,0,0,0,0,0],
+    [50,50,50,50,50,50,50,50],
+    [10,10,20,30,30,20,10,10],
+    [5,5,10,25,25,10,5,5],
+    [0,0,0,20,20,0,0,0],
+    [5,-5,-10,0,0,-10,-5,5],
+    [5,10,10,-20,-20,10,10,5],
+    [0,0,0,0,0,0,0,0]
+];
+
 const piecePositionWeights = {
     'n': [[-50,-40,-30,-30,-30,-30,-40,-50],[-40,-20,0,0,0,0,-20,-40],[-30,0,10,15,15,10,0,-30],[-30,5,15,20,20,15,5,-30],[-30,0,15,20,20,15,0,-30],[-30,5,10,15,15,10,5,-30],[-40,-20,0,5,5,0,-20,-40],[-50,-40,-30,-30,-30,-30,-40,-50]],
     'b': [[-20,-10,-10,-10,-10,-10,-10,-20],[-10,0,0,0,0,0,0,-10],[-10,0,5,10,10,5,0,-10],[-10,5,5,10,10,5,5,-10],[-10,0,10,10,10,10,0,-10],[-10,10,10,10,10,10,10,-10],[-10,5,0,0,0,0,5,-10],[-20,-10,-10,-10,-10,-10,-10,-20]],
@@ -129,70 +179,54 @@ const piecePositionWeights = {
     'k': [[-30,-40,-40,-50,-50,-40,-40,-30],[-30,-40,-40,-50,-50,-40,-40,-30],[-30,-40,-40,-50,-50,-40,-40,-30],[-30,-40,-40,-50,-50,-40,-40,-30],[-20,-30,-30,-40,-40,-30,-30,-20],[-10,-20,-20,-20,-20,-20,-20,-10],[20,20,0,0,0,0,20,20],[20,30,10,0,0,10,30,20]]
 };
 
-function onDragStart(source, piece) {
-    if (game.game_over()) return false;
-    if (piece.search(/^b/) !== -1) return false;
-    highlightLegalMoves(source);
-    return true;
-}
-
-function onDrop(source, target) {
-    removeHighlights();
-    const move = game.move({
-        from: source,
-        to: target,
-        promotion: 'q'
+function isProtected(square) {
+    const piece = game.get(square);
+    if (!piece) return false;
+    
+    const defenders = [];
+    game.moves({ verbose: true }).forEach(move => {
+        if (move.to === square && game.get(move.from).color === piece.color) {
+            defenders.push(move.from);
+        }
     });
-    if (move === null) return 'snapback';
-    updateBoard();
-    window.setTimeout(makeAIMove, 250);
-}
-
-function onSnapEnd() {
-    board.position(game.fen());
-}
-
-function highlightLegalMoves(square) {
-    const moves = game.moves({
-        square: square,
-        verbose: true
-    });
-    moves.forEach(move => {
-        $board.find('.square-' + move.to).addClass('highlight-legal');
-    });
-}
-
-function removeHighlights() {
-    $board.find('.square-55d63').removeClass('highlight-legal');
-}
-
-function updateBoard() {
-    board.position(game.fen());
-    updateStatus();
-    updateCapturedPieces();
-    updateMoveHistory(game.history()[game.history().length - 1]);
+    return defenders.length > 0;
 }
 
 function makeAIMove() {
     const moves = game.moves({ verbose: true });
     if (moves.length === 0) return;
 
-    const depthMap = {1: 2, 2: 3, 3: 4, 4: 5, 5: 6};
+    // Check opening book
+    const gameHistory = game.history().join(' ');
+    const bookMoves = openingBook[gameHistory] || openingBook['start'];
+    
+    if (bookMoves) {
+        const validBookMoves = bookMoves.filter(move => 
+            moves.some(m => m.san === move)
+        );
+        if (validBookMoves.length > 0) {
+            const bookMove = validBookMoves[Math.floor(Math.random() * validBookMoves.length)];
+            game.move(bookMove);
+            updateBoard();
+            return;
+        }
+    }
+
+    const depthMap = {1: 2, 2: 2, 3: 3, 4: 4, 5: 5};
     const depth = depthMap[difficulty];
     
-    moves.sort((a, b) => {
-        const aScore = (a.captured ? getPieceValue(a.captured) : 0) + (a.san.includes('+') ? 50 : 0);
-        const bScore = (b.captured ? getPieceValue(b.captured) : 0) + (b.san.includes('+') ? 50 : 0);
-        return bScore - aScore;
-    });
+    moves.sort((a, b) => getMoveScore(b) - getMoveScore(a));
 
-    let bestMove = null;
+    let bestMove = moves[0];
     let bestValue = -Infinity;
-
-    for (const move of moves) {
+    const searchLimit = Math.min(moves.length, 10 + difficulty * 2);
+    
+    for (let i = 0; i < searchLimit; i++) {
+        const move = moves[i];
         game.move(move);
         const value = -minimax(depth - 1, -Infinity, Infinity, false);
         game.undo();
+        
         if (value > bestValue) {
             bestValue = value;
             bestMove = move;
@@ -202,6 +236,20 @@ function makeAIMove() {
     game.move(bestMove);
     playSound(bestMove.captured ? 'capture' : 'move');
     updateBoard();
+}
+
+function getMoveScore(move) {
+    let score = 0;
+    if (move.captured) {
+        score += getPieceValue(move.captured) * 10;
+        if (!isProtected(move.to)) score += 50;
+    }
+    if (move.san.includes('+')) score += 500;
+    if (move.san.includes('#')) score += 9999;
+    if (['e4','d4','e5','d5'].includes(move.to)) score += 30;
+    if (move.piece === 'p') score += 10;
+    if (isProtected(move.to)) score += 20;
+    return score;
 }
 
 function minimax(depth, alpha, beta, isMaximizing) {
@@ -256,8 +304,7 @@ function evaluateBoard() {
     }
     return value;
 }
-
-function getPieceValue(piece) {
+        function getPieceValue(piece) {
     const values = {p: 100, n: 320, b: 330, r: 500, q: 900, k: 20000};
     return values[piece] || 0;
 }
@@ -333,20 +380,93 @@ function playSound(type) {
     }
 }
 
+        function onSquareClick(square) {
+    removeHighlights();
+    
+    // If we already have a selected square
+    if (selectedSquare !== null) {
+        // Try to make the move
+        const move = game.move({
+            from: selectedSquare,
+            to: square,
+            promotion: 'q'
+        });
+
+        if (move) {
+            updateBoard();
+            window.setTimeout(makeAIMove, 250);
+        }
+        selectedSquare = null;
+        return;
+    }
+
+    // First click - select the piece if it's white's turn
+    const piece = game.get(square);
+    if (piece && piece.color === 'w' && game.turn() === 'w') {
+        selectedSquare = square;
+        highlightLegalMoves(square);
+    }
+}
+        
+function onDragStart(source, piece) {
+    if (game.game_over()) return false;
+    if (piece.search(/^b/) !== -1) return false;
+    highlightLegalMoves(source);
+    return true;
+}
+
+function onDrop(source, target) {
+    removeHighlights();
+    const move = game.move({
+        from: source,
+        to: target,
+        promotion: 'q'
+    });
+    if (move === null) return 'snapback';
+    updateBoard();
+    window.setTimeout(makeAIMove, 250);
+}
+
+function onSnapEnd() {
+    board.position(game.fen());
+}
+
+function highlightLegalMoves(square) {
+    const moves = game.moves({
+        square: square,
+        verbose: true
+    });
+    moves.forEach(move => {
+        $board.find('.square-' + move.to).addClass('highlight-legal');
+    });
+}
+
+function removeHighlights() {
+    $board.find('.square-55d63').removeClass('highlight-legal');
+}
+
+function updateBoard() {
+    board.position(game.fen());
+    updateStatus();
+    updateCapturedPieces();
+    updateMoveHistory(game.history()[game.history().length - 1]);
+}
+
 function initGame() {
     game = new Chess();
     moveHistory = [];
     capturedPieces = { w: [], b: [] };
     selectedSquare = null;
     
-    const config = {
-        draggable: true,
-        position: 'start',
-        onDragStart: onDragStart,
-        onDrop: onDrop,
-        onSnapEnd: onSnapEnd,
-        pieceTheme: 'https://chessboardjs.com/img/chesspieces/wikipedia/{piece}.png'
-    };
+const config = {
+    draggable: true,
+    position: 'start',
+    onDragStart: onDragStart,
+    onDrop: onDrop,
+    onSnapEnd: onSnapEnd,
+    onSquareClick: onSquareClick,
+    pieceTheme: 'https://chessboardjs.com/img/chesspieces/wikipedia/{piece}.png'
+};
     
     board = Chessboard('board', config);
     updateStatus();
