@@ -125,11 +125,11 @@ const moveSound = new Audio('https://assets.mixkit.co/active_storage/sfx/2571/25
 const captureSound = new Audio('https://assets.mixkit.co/active_storage/sfx/2572/2572-preview.mp3');
 
 const pieceImportance = {
-    'p': 1,    
-    'n': 1.2,  
-    'b': 1.2,  
-    'r': 1.5,  
-    'q': 2.0,  
+    'p': 1.1,    
+    'n': 1.3,  
+    'b': 1.4,  
+    'r': 1.7,  
+    'q': 2.3,  
     'k': 3.0   
 };
 
@@ -163,56 +163,56 @@ const openingBook = {
 };
 
 const pawnPositionWhite = [
-    [0,0,0,0,0,0,0,0],
-    [50,50,50,50,50,50,50,50],
-    [10,10,20,30,30,20,10,10],
-    [5,5,10,25,25,10,5,5],
-    [0,0,0,20,20,0,0,0],
-    [5,-5,-10,0,0,-10,-5,5],
-    [5,10,10,-20,-20,10,10,5],
-    [0,0,0,0,0,0,0,0]
+    [0,  0,  0,  0,  0,  0,  0,  0],
+    [50, 50, 50, 50, 50, 50, 50, 50],
+    [10, 10, 20, 30, 30, 20, 10, 10],
+    [5,  5, 10, 25, 25, 10,  5,  5],
+    [0,  0,  0, 20, 20,  0,  0,  0],
+    [5, -5,-10,  0,  0,-10, -5,  5],
+    [5, 10, 10,-20,-20, 10, 10,  5],
+    [0,  0,  0,  0,  0,  0,  0,  0]
 ];
 
 const piecePositionWeights = {
     'n': [
         [-50,-40,-30,-30,-30,-30,-40,-50],
-        [-40,-20,0,0,0,0,-20,-40],
-        [-30,0,10,15,15,10,0,-30],
-        [-30,5,15,20,20,15,5,-30],
-        [-30,0,15,20,20,15,0,-30],
-        [-30,5,10,15,15,10,5,-30],
-        [-40,-20,0,5,5,0,-20,-40],
+        [-40,-20,  0,  0,  0,  0,-20,-40],
+        [-30,  0, 10, 15, 15, 10,  0,-30],
+        [-30,  5, 15, 20, 20, 15,  5,-30],
+        [-30,  0, 15, 20, 20, 15,  0,-30],
+        [-30,  5, 10, 15, 15, 10,  5,-30],
+        [-40,-20,  0,  5,  5,  0,-20,-40],
         [-50,-40,-30,-30,-30,-30,-40,-50]
     ],
     'b': [
         [-20,-10,-10,-10,-10,-10,-10,-20],
-        [-10,0,0,0,0,0,0,-10],
-        [-10,0,5,10,10,5,0,-10],
-        [-10,5,5,10,10,5,5,-10],
-        [-10,0,10,10,10,10,0,-10],
-        [-10,10,10,10,10,10,10,-10],
-        [-10,5,0,0,0,0,5,-10],
+        [-10,  0,  0,  0,  0,  0,  0,-10],
+        [-10,  0,  5, 10, 10,  5,  0,-10],
+        [-10,  5,  5, 10, 10,  5,  5,-10],
+        [-10,  0, 10, 10, 10, 10,  0,-10],
+        [-10, 10, 10, 10, 10, 10, 10,-10],
+        [-10,  5,  0,  0,  0,  0,  5,-10],
         [-20,-10,-10,-10,-10,-10,-10,-20]
     ],
     'r': [
-        [0,0,0,0,0,0,0,0],
-        [5,10,10,10,10,10,10,5],
-        [-5,0,0,0,0,0,0,-5],
-        [-5,0,0,0,0,0,0,-5],
-        [-5,0,0,0,0,0,0,-5],
-        [-5,0,0,0,0,0,0,-5],
-        [-5,0,0,0,0,0,0,-5],
-        [0,0,0,5,5,0,0,0]
+        [0,  0,  0,  0,  0,  0,  0,  0],
+        [5, 10, 10, 10, 10, 10, 10,  5],
+        [-5,  0,  0,  0,  0,  0,  0, -5],
+        [-5,  0,  0,  0,  0,  0,  0, -5],
+        [-5,  0,  0,  0,  0,  0,  0, -5],
+        [-5,  0,  0,  0,  0,  0,  0, -5],
+        [-5,  0,  0,  0,  0,  0,  0, -5],
+        [0,  0,  0,  5,  5,  0,  0,  0]
     ],
     'q': [
-        [-20,-10,-10,-5,-5,-10,-10,-20],
-        [-10,0,0,0,0,0,0,-10],
-        [-10,0,5,5,5,5,0,-10],
-        [-5,0,5,5,5,5,0,-5],
-        [0,0,5,5,5,5,0,-5],
-        [-10,5,5,5,5,5,0,-10],
-        [-10,0,5,0,0,0,0,-10],
-        [-20,-10,-10,-5,-5,-10,-10,-20]
+        [-20,-10,-10, -5, -5,-10,-10,-20],
+        [-10,  0,  0,  0,  0,  0,  0,-10],
+        [-10,  0,  5,  5,  5,  5,  0,-10],
+        [-5,   0,  5,  5,  5,  5,  0, -5],
+        [0,    0,  5,  5,  5,  5,  0, -5],
+        [-10,  5,  5,  5,  5,  5,  0,-10],
+        [-10,  0,  5,  0,  0,  0,  0,-10],
+        [-20,-10,-10, -5, -5,-10,-10,-20]
     ],
     'k': [
         [-30,-40,-40,-50,-50,-40,-40,-30],
@@ -221,8 +221,8 @@ const piecePositionWeights = {
         [-30,-40,-40,-50,-50,-40,-40,-30],
         [-20,-30,-30,-40,-40,-30,-30,-20],
         [-10,-20,-20,-20,-20,-20,-20,-10],
-        [20,20,0,0,0,0,20,20],
-        [20,30,10,0,0,10,30,20]
+        [20, 20,  0,  0,  0,  0, 20, 20],
+        [20, 30, 10,  0,  0, 10, 30, 20]
     ]
 };
 
@@ -231,7 +231,7 @@ const difficultyMultiplier = {
     2: 0.8,
     3: 1.0,
     4: 1.2,
-    5: 1.5
+    5: 1.7
 };
 
 const depthMap = {
@@ -241,10 +241,49 @@ const depthMap = {
     4: 3,
     5: 4
 };
-        function playSound(isCapture) {
+
+function playSound(isCapture) {
     const sound = isCapture ? captureSound : moveSound;
     sound.currentTime = 0;
     sound.play().catch(() => {});
+}
+
+function onDragStart(source, piece) {
+    return !game.game_over() && piece.search(/^b/) === -1;
+}
+
+function onDrop(source, target) {
+    removeHighlights();
+    const move = game.move({
+        from: source,
+        to: target,
+        promotion: 'q'
+    });
+
+    if (move === null) return 'snapback';
+    
+    playSound(move.captured);
+    updateBoard();
+    window.setTimeout(makeAIMove, 250);
+}
+
+function onSnapEnd() {
+    board.position(game.fen());
+}
+
+function removeHighlights() {
+    $board.find('.square-55d63').removeClass('highlight-legal');
+}
+
+function highlightLegalMoves(square) {
+    const moves = game.moves({
+        square: square,
+        verbose: true
+    });
+    
+    moves.forEach(move => {
+        $board.find('.square-' + move.to).addClass('highlight-legal');
+    });
 }
 
 function onSquareClick(square) {
@@ -270,19 +309,59 @@ function onSquareClick(square) {
     }
 }
 
-function isProtected(square) {
-    const piece = game.get(square);
-    if (!piece) return false;
-    const defenders = [];
-    game.moves({ verbose: true }).forEach(move => {
-        if (move.to === square && game.get(move.from).color === piece.color) {
-            defenders.push(move.from);
+function updateBoard() {
+    board.position(game.fen());
+    updateStatus();
+    updateMoveHistory();
+    updateCapturedPieces();
+}
+
+function updateMoveHistory() {
+    const moves = game.history({ verbose: true });
+    let html = '';
+    for (let i = 0; i < moves.length; i += 2) {
+        const moveNumber = Math.floor(i/2) + 1;
+        html += `<div class="move-row">
+            <span class="move-number">${moveNumber}.</span>
+            <span class="move">${moves[i].san}</span>
+            <span class="move">${moves[i+1] ? moves[i+1].san : ''}</span>
+        </div>`;
+    }
+    $('#moveHistory').html(html);
+    $('#moveHistory').scrollTop($('#moveHistory')[0].scrollHeight);
+}
+
+function updateCapturedPieces() {
+    const history = game.history({ verbose: true });
+    capturedPieces = { w: [], b: [] };
+    
+    history.forEach(move => {
+        if (move.captured) {
+            if (move.color === 'w') {
+                capturedPieces.b.push(move.captured);
+            } else {
+                capturedPieces.w.push(move.captured);
+            }
         }
     });
-    return defenders.length > 0;
+
+    displayCapturedPieces();
+}
+
+function displayCapturedPieces() {
+    ['w', 'b'].forEach(color => {
+        const $container = color === 'w' ? $('#capturedWhite') : $('#capturedBlack');
+        $container.empty();
+        
+        capturedPieces[color].forEach(piece => {
+            $container.append(`<img src="https://chessboardjs.com/img/chesspieces/wikipedia/${color}${piece.toUpperCase()}.png">`);
+        });
+    });
 }
 
 function makeAIMove() {
+    if (game.game_over()) return;
+
     const moves = game.moves({ verbose: true });
     if (moves.length === 0) return;
 
@@ -303,38 +382,19 @@ function makeAIMove() {
     }
 
     const depth = depthMap[difficulty];
-    const searchLimit = Math.min(moves.length, 8 + difficulty * 3);
-    
     moves.sort((a, b) => getMoveScore(b) - getMoveScore(a));
-
+    
     let bestMove = moves[0];
     let bestValue = -Infinity;
     
-    if (difficulty >= 4) {
-        for (let d = 1; d <= depth; d++) {
-            for (let i = 0; i < searchLimit; i++) {
-                const move = moves[i];
-                game.move(move);
-                const value = -minimax(d - 1, -Infinity, Infinity, false);
-                game.undo();
-                
-                if (value > bestValue) {
-                    bestValue = value;
-                    bestMove = move;
-                }
-            }
-        }
-    } else {
-        for (let i = 0; i < searchLimit; i++) {
-            const move = moves[i];
-            game.move(move);
-            const value = -minimax(depth - 1, -Infinity, Infinity, false);
-            game.undo();
-            
-            if (value > bestValue) {
-                bestValue = value;
-                bestMove = move;
-            }
+    for (const move of moves) {
+        game.move(move);
+        const value = minimax(depth - 1, -Infinity, Infinity, false);
+        game.undo();
+        
+        if (value > bestValue) {
+            bestValue = value;
+            bestMove = move;
         }
     }
 
@@ -342,24 +402,12 @@ function makeAIMove() {
     playSound(move.captured);
     updateBoard();
 }
-        function getMoveScore(move) {
-    let score = 0;
-    if (move.captured) {
-        score += getPieceValue(move.captured) * 10;
-        if (!isProtected(move.to)) score += 50;
-    }
-    if (move.san.includes('+')) score += 500;
-    if (move.san.includes('#')) score += 9999;
-    if (['e4','d4','e5','d5'].includes(move.to)) score += 30;
-    if (move.piece === 'p') score += 10;
-    if (isProtected(move.to)) score += 20;
-    return score;
-}
 
 function minimax(depth, alpha, beta, isMaximizing) {
-    if (depth === 0) return evaluateBoard();
-    
+    if (depth === 0) return evaluatePosition();
+
     const moves = game.moves();
+    
     if (isMaximizing) {
         let maxValue = -Infinity;
         for (const move of moves) {
@@ -383,7 +431,7 @@ function minimax(depth, alpha, beta, isMaximizing) {
     }
 }
 
-function evaluateBoard() {
+function evaluatePosition() {
     if (game.in_checkmate()) return game.turn() === 'w' ? -9999 : 9999;
     if (game.in_draw()) return 0;
 
@@ -407,13 +455,8 @@ function evaluateBoard() {
                         piecePositionWeights[piece.type][j][i]) * multiplier;
                 }
 
-                if (difficulty >= 4) {
-                    if (isProtected(square)) pieceValue *= 1.1;
-                    if (piece.type === 'k') {
-                        pieceValue += evaluateKingSafety(square, piece.color) * multiplier;
-                    }
-                }
-
+                if (isProtected(square)) pieceValue *= 1.1;
+                
                 value += piece.color === 'w' ? pieceValue : -pieceValue;
             }
         }
@@ -424,6 +467,32 @@ function evaluateBoard() {
 function getPieceValue(piece) {
     const values = {p: 100, n: 320, b: 330, r: 500, q: 900, k: 20000};
     return values[piece] || 0;
+}
+
+function isProtected(square) {
+    const piece = game.get(square);
+    if (!piece) return false;
+    const defenders = [];
+    game.moves({ verbose: true }).forEach(move => {
+        if (move.to === square && game.get(move.from).color === piece.color) {
+            defenders.push(move.from);
+        }
+    });
+    return defenders.length > 0;
+}
+
+function getMoveScore(move) {
+    let score = 0;
+    if (move.captured) {
+        score += getPieceValue(move.captured) * 10;
+        if (!isProtected(move.to)) score += 50;
+    }
+    if (move.san.includes('+')) score += 500;
+    if (move.san.includes('#')) score += 9999;
+    if (['e4','d4','e5','d5'].includes(move.to)) score += 30;
+    if (move.piece === 'p') score += 10;
+    if (isProtected(move.to)) score += 20;
+    return score;
 }
 
 function updateStatus() {
@@ -439,12 +508,7 @@ function updateStatus() {
     $('#status').text(status);
 }
 
-function initGame() {
-    game = new Chess();
-    moveHistory = [];
-    capturedPieces = { w: [], b: [] };
-    selectedSquare = null;
-    
+$(document).ready(function() {
     const config = {
         draggable: true,
         position: 'start',
@@ -456,17 +520,20 @@ function initGame() {
     };
     
     board = Chessboard('board', config);
-    updateStatus();
-    updateCapturedPieces();
-    $('#moveHistory').empty();
-}
-
-$(document).ready(function() {
-    initGame();
+    
+    $('#newGame').click(() => {
+        game = new Chess();
+        board.start();
+        moveHistory = [];
+        capturedPieces = { w: [], b: [] };
+        updateStatus();
+        updateMoveHistory();
+        updateCapturedPieces();
+    });
+    
     $('#difficulty').change(function() {
         difficulty = parseInt($(this).val());
     });
-    $('#newGame').click(initGame);
 });
 
 const style = document.createElement('style');
