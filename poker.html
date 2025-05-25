@@ -7,80 +7,114 @@
     <style>
         body {
             font-family: 'Arial', sans-serif;
-            background: #1a472a;
+            background: linear-gradient(135deg, #1a472a, #2d5a3d);
             color: white;
             margin: 0;
             padding: 20px;
+            min-height: 100vh;
         }
         .game-container {
             max-width: 1200px;
             margin: 0 auto;
         }
         .player-area, .dealer-area {
-            background: #2a5a3b;
+            background: rgba(42, 90, 59, 0.9);
             padding: 20px;
-            border-radius: 10px;
+            border-radius: 15px;
             margin: 10px 0;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.1);
         }
         .card {
             display: inline-block;
             width: 100px;
             height: 140px;
-            background: white;
+            background: linear-gradient(145deg, #ffffff, #f0f0f0);
             color: black;
             margin: 5px;
-            border-radius: 8px;
+            border-radius: 12px;
             text-align: center;
-            line-height: 140px;
             cursor: pointer;
-            transition: transform 0.2s;
-            font-size: 24px;
+            transition: all 0.3s ease;
+            font-size: 20px;
             position: relative;
-            box-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
         }
         .card.selected {
-            transform: translateY(-15px);
-            box-shadow: 0 8px 16px rgba(0,0,0,0.3);
-            border: 2px solid #ffd700;
+            transform: translateY(-20px);
+            box-shadow: 0 12px 30px rgba(255, 215, 0, 0.4);
+            border: 3px solid #ffd700;
+            background: linear-gradient(145deg, #fff8dc, #f0f8dc);
+        }
+        .card.back {
+            background: linear-gradient(145deg, #8b4513, #a0522d);
+            color: #ffd700;
+            font-size: 40px;
+            cursor: default;
+        }
+        .card.back:hover {
+            transform: none;
         }
         .controls {
             margin: 20px 0;
             display: flex;
-            gap: 10px;
+            gap: 15px;
             flex-wrap: wrap;
+            justify-content: center;
         }
         button {
-            background: #1e824c;
+            background: linear-gradient(145deg, #1e824c, #27ae60);
             color: white;
             border: none;
-            padding: 12px 24px;
-            border-radius: 5px;
+            padding: 15px 30px;
+            border-radius: 10px;
             cursor: pointer;
             font-size: 16px;
-            transition: background 0.3s;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
         button:hover:not(:disabled) {
-            background: #2ecc71;
+            background: linear-gradient(145deg, #27ae60, #2ecc71);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
         }
         button:disabled {
-            background: #95a5a6;
+            background: linear-gradient(145deg, #7f8c8d, #95a5a6);
             cursor: not-allowed;
+            transform: none;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
         #fold-btn {
-            background: #c0392b;
+            background: linear-gradient(145deg, #c0392b, #e74c3c);
         }
         #fold-btn:hover:not(:disabled) {
-            background: #e74c3c;
+            background: linear-gradient(145deg, #e74c3c, #ec7063);
         }
         .betting-area {
-            background: #234d35;
+            background: rgba(35, 77, 53, 0.9);
             padding: 20px;
-            border-radius: 10px;
+            border-radius: 15px;
             margin: 15px 0;
             display: flex;
-            gap: 10px;
+            gap: 15px;
             align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.1);
         }
         .red { color: #e74c3c; }
         .black { color: #2c3e50; }
@@ -93,26 +127,41 @@
         }
         
         .info-box {
-            background: #234d35;
-            padding: 15px;
-            border-radius: 8px;
+            background: rgba(35, 77, 53, 0.9);
+            padding: 20px;
+            border-radius: 15px;
             text-align: center;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.1);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        
+        .info-box h3 {
+            margin: 0;
+            font-size: 18px;
+            color: #ffd700;
         }
         
         #message {
-            background: #234d35;
-            padding: 15px;
-            border-radius: 8px;
+            background: rgba(35, 77, 53, 0.9);
+            padding: 20px;
+            border-radius: 15px;
             margin: 15px 0;
             text-align: center;
             font-size: 18px;
+            font-weight: bold;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.1);
+            min-height: 20px;
         }
         
         .hand-rankings {
-            background: #234d35;
+            background: rgba(35, 77, 53, 0.9);
             padding: 20px;
-            border-radius: 8px;
+            border-radius: 15px;
             margin-top: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.1);
         }
         
         .hand-rankings table {
@@ -121,16 +170,40 @@
         }
         
         .hand-rankings th, .hand-rankings td {
-            padding: 8px;
+            padding: 12px 8px;
             text-align: left;
-            border-bottom: 1px solid #395d4a;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+        }
+        
+        .hand-rankings th {
+            color: #ffd700;
+            font-weight: bold;
         }
         
         input[type="number"] {
-            padding: 10px;
-            border-radius: 5px;
-            border: none;
-            width: 100px;
+            padding: 15px;
+            border-radius: 10px;
+            border: 2px solid #27ae60;
+            width: 120px;
+            font-size: 16px;
+            font-weight: bold;
+            text-align: center;
+            background: white;
+            color: #2c3e50;
+        }
+        
+        input[type="number"]:focus {
+            outline: none;
+            border-color: #ffd700;
+            box-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 36px;
+            margin-bottom: 30px;
+            color: #ffd700;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
         }
 
         @media (max-width: 768px) {
@@ -141,8 +214,7 @@
             .card {
                 width: 60px;
                 height: 90px;
-                font-size: 18px;
-                line-height: 90px;
+                font-size: 16px;
                 margin: 3px;
             }
             
@@ -178,69 +250,75 @@
             
             h1 {
                 font-size: 24px;
-                text-align: center;
             }
             
             .player-area, .dealer-area {
-                padding: 10px;
+                padding: 15px;
             }
         }
     </style>
 </head>
 <body>
     <div class="game-container">
-        <h1>5 Card Draw Poker</h1>
+        <h1>🃏 5 Card Draw Poker 🃏</h1>
         
         <div class="game-info">
             <div class="info-box">
-                <h3>Pot: $<span id="pot">0</span></h3>
+                <h3>💰 Pot: $<span id="pot">0</span></h3>
             </div>
             <div class="info-box">
-                <h3>Your Money: $<span id="player-money">1000</span></h3>
+                <h3>💵 Your Money: $<span id="player-money">1000</span></h3>
             </div>
             <div class="info-box">
-                <h3>Selected: <span id="selected-count">0</span>/<span id="max-trades">3</span></h3>
+                <h3>🎯 Selected: <span id="selected-count">0</span>/<span id="max-trades">3</span></h3>
+            </div>
+            <div class="info-box">
+                <h3>🎮 Round: <span id="round">1</span></h3>
             </div>
         </div>
 
         <div class="dealer-area">
-            <h2>Dealer's Hand</h2>
+            <h2>🤖 Dealer's Hand</h2>
             <div id="dealer-cards"></div>
+            <div id="dealer-hand-info"></div>
         </div>
 
         <div class="betting-area">
-            <input type="number" id="bet-amount" min="10" step="10" value="10">
-            <button onclick="placeBet()" id="bet-btn">Place Bet</button>
+            <label for="bet-amount" style="font-weight: bold;">Bet Amount:</label>
+            <input type="number" id="bet-amount" min="10" max="1000" step="10" value="10">
+            <button onclick="placeBet()" id="bet-btn">💰 Place Bet</button>
         </div>
 
         <div class="player-area">
-            <h2>Your Hand</h2>
+            <h2>👤 Your Hand</h2>
             <div id="player-cards"></div>
+            <div id="player-hand-info"></div>
         </div>
 
         <div class="controls">
-            <button onclick="dealCards()" id="deal-btn">Deal</button>
-            <button onclick="tradeCards()" id="trade-btn" disabled>Trade</button>
-            <button onclick="fold()" id="fold-btn" disabled>Fold</button>
-            <button onclick="showDown()" id="showdown-btn" disabled>Show Down</button>
+            <button onclick="dealCards()" id="deal-btn" disabled>🎴 Deal Cards</button>
+            <button onclick="tradeCards()" id="trade-btn" disabled>🔄 Trade Selected</button>
+            <button onclick="showDown()" id="showdown-btn" disabled>🎯 Show Down</button>
+            <button onclick="fold()" id="fold-btn" disabled>❌ Fold</button>
+            <button onclick="newGame()" id="new-game-btn">🎲 New Game</button>
         </div>
 
-        <div id="message"></div>
+        <div id="message">Place your bet to start playing!</div>
 
         <div class="hand-rankings">
-            <h2>Poker Hand Rankings</h2>
+            <h2>🏆 Poker Hand Rankings (Highest to Lowest)</h2>
             <table>
-                <tr><td>1. Royal Flush (Hearts)</td><td>10♥ J♥ Q♥ K♥ A♥ (Hearts only)</td></tr>
-                <tr><td>2. Flush Royal</td><td>10 J Q K A (Any suits)</td></tr>
-                <tr><td>3. Straight Flush</td><td>9♥ 8♥ 7♥ 6♥ 5♥ (same suit)</td></tr>
-                <tr><td>4. Four of a Kind</td><td>Q♠ Q♣ Q♥ Q♦ 2♣</td></tr>
-                <tr><td>5. Full House</td><td>J♥ J♣ J♠ 8♥ 8♣</td></tr>
-                <tr><td>6. Flush</td><td>A♣ J♣ 8♣ 6♣ 2♣</td></tr>
-                <tr><td>7. Straight</td><td>10♠ 9♥ 8♣ 7♦ 6♥</td></tr>
-                <tr><td>8. Three of a Kind</td><td>8♠ 8♥ 8♣ K♥ 4♦</td></tr>
-                <tr><td>9. Two Pair</td><td>K♠ K♥ 9♣ 9♦ J♥</td></tr>
-                <tr><td>10. One Pair</td><td>10♠ 10♥ A♣ J♦ 3♣</td></tr>
-                <tr><td>11. High Card</td><td>A♥ J♣ 8♦ 7♠ 2♥</td></tr>
+                <tr><th>Rank</th><th>Hand</th><th>Example</th></tr>
+                <tr><td>1.</td><td>Royal Flush</td><td>A♠ K♠ Q♠ J♠ 10♠</td></tr>
+                <tr><td>2.</td><td>Straight Flush</td><td>9♥ 8♥ 7♥ 6♥ 5♥</td></tr>
+                <tr><td>3.</td><td>Four of a Kind</td><td>Q♠ Q♣ Q♥ Q♦ 2♣</td></tr>
+                <tr><td>4.</td><td>Full House</td><td>J♥ J♣ J♠ 8♥ 8♣</td></tr>
+                <tr><td>5.</td><td>Flush</td><td>A♣ J♣ 8♣ 6♣ 2♣</td></tr>
+                <tr><td>6.</td><td>Straight</td><td>10♠ 9♥ 8♣ 7♦ 6♥</td></tr>
+                <tr><td>7.</td><td>Three of a Kind</td><td>8♠ 8♥ 8♣ K♥ 4♦</td></tr>
+                <tr><td>8.</td><td>Two Pair</td><td>K♠ K♥ 9♣ 9♦ J♥</td></tr>
+                <tr><td>9.</td><td>One Pair</td><td>10♠ 10♥ A♣ J♦ 3♣</td></tr>
+                <tr><td>10.</td><td>High Card</td><td>A♥ J♣ 8♦ 7♠ 2♥</td></tr>
             </table>
         </div>
     </div>
@@ -254,7 +332,9 @@
         let selectedCards = new Set();
         let playerMoney = 1000;
         let pot = 0;
-        let gamePhase = 'betting';
+        let currentBet = 0;
+        let gamePhase = 'betting'; // 'betting', 'dealing', 'trading', 'showdown'
+        let round = 1;
 
         function createDeck() {
             deck = [];
@@ -273,13 +353,11 @@
         }
 
         function getCardValue(value) {
-            const valueMap = {
-                'A': 14,
-                'K': 13,
-                'Q': 12,
-                'J': 11
-            };
-            return valueMap[value] || parseInt(value);
+            if (value === 'A') return 14;
+            if (value === 'K') return 13;
+            if (value === 'Q') return 12;
+            if (value === 'J') return 11;
+            return parseInt(value);
         }
 
         function evaluateHand(hand) {
@@ -287,82 +365,116 @@
             const suits = hand.map(card => card.suit);
             
             const isFlush = suits.every(suit => suit === suits[0]);
-            const isStraight = (values[4] - values[0] === 4) || 
-                             (values.join(',') === '2,3,4,5,14');
+            const isStraight = (values[4] - values[0] === 4 && new Set(values).size === 5) || 
+                             (values.join(',') === '2,3,4,5,14'); // A-2-3-4-5 straight
             
-            // Royal Flush (Hearts only)
-            if (suits.every(suit => suit === '♥') && values.join(',') === '10,11,12,13,14') {
-                return {rank: 11, name: 'Royal Flush (Hearts)'};
-            }
-            
-            // Flush Royal (Any suits)
-            if (values.join(',') === '10,11,12,13,14') {
-                return {rank: 10, name: 'Flush Royal'};
-            }
-            
-            // Straight Flush
-            if (isFlush && isStraight) {
-                return {rank: 9, name: 'Straight Flush'};
-            }
-            
-            // Count frequencies
+            // Count value frequencies
             const valueCounts = {};
             values.forEach(v => valueCounts[v] = (valueCounts[v] || 0) + 1);
             const frequencies = Object.values(valueCounts).sort((a, b) => b - a);
             
+            // Royal Flush (A, K, Q, J, 10 of same suit)
+            if (isFlush && values.join(',') === '10,11,12,13,14') {
+                return {rank: 10, name: 'Royal Flush', score: 10000 + Math.max(...values)};
+            }
+            
+            // Straight Flush
+            if (isFlush && isStraight) {
+                return {rank: 9, name: 'Straight Flush', score: 9000 + Math.max(...values)};
+            }
+            
             // Four of a Kind
             if (frequencies[0] === 4) {
-                return {rank: 8, name: 'Four of a Kind'};
+                const fourKind = Object.keys(valueCounts).find(k => valueCounts[k] === 4);
+                return {rank: 8, name: 'Four of a Kind', score: 8000 + parseInt(fourKind)};
             }
             
             // Full House
             if (frequencies[0] === 3 && frequencies[1] === 2) {
-                return {rank: 7, name: 'Full House'};
+                const threeKind = Object.keys(valueCounts).find(k => valueCounts[k] === 3);
+                return {rank: 7, name: 'Full House', score: 7000 + parseInt(threeKind)};
             }
             
             // Flush
             if (isFlush) {
-                return {rank: 6, name: 'Flush'};
+                return {rank: 6, name: 'Flush', score: 6000 + Math.max(...values)};
             }
             
             // Straight
             if (isStraight) {
-                return {rank: 5, name: 'Straight'};
+                return {rank: 5, name: 'Straight', score: 5000 + Math.max(...values)};
             }
             
             // Three of a Kind
             if (frequencies[0] === 3) {
-                return {rank: 4, name: 'Three of a Kind'};
+                const threeKind = Object.keys(valueCounts).find(k => valueCounts[k] === 3);
+                return {rank: 4, name: 'Three of a Kind', score: 4000 + parseInt(threeKind)};
             }
             
             // Two Pair
             if (frequencies[0] === 2 && frequencies[1] === 2) {
-                return {rank: 3, name: 'Two Pair'};
+                const pairs = Object.keys(valueCounts).filter(k => valueCounts[k] === 2).map(k => parseInt(k));
+                return {rank: 3, name: 'Two Pair', score: 3000 + Math.max(...pairs)};
             }
             
             // One Pair
             if (frequencies[0] === 2) {
-                return {rank: 2, name: 'One Pair'};
+                const pair = Object.keys(valueCounts).find(k => valueCounts[k] === 2);
+                return {rank: 2, name: 'One Pair', score: 2000 + parseInt(pair)};
             }
             
-            return {rank: 1, name: 'High Card'};
+            // High Card
+            return {rank: 1, name: 'High Card', score: 1000 + Math.max(...values)};
         }
 
         function dealerAI() {
             const handEval = evaluateHand(dealerHand);
             const discards = new Set();
             
-            if (handEval.rank <= 2) { // High Card or One Pair
+            // Dealer strategy based on hand strength
+            if (handEval.rank >= 4) {
+                // Good hand - keep all cards
+                return discards;
+            } else if (handEval.rank === 3) {
+                // Two pair - keep pairs, discard kicker
                 const valueCounts = {};
                 dealerHand.forEach(card => {
-                    const val = card.value;
+                    const val = getCardValue(card.value);
                     valueCounts[val] = (valueCounts[val] || 0) + 1;
                 });
                 
                 dealerHand.forEach((card, index) => {
-                    if (valueCounts[card.value] === 1 && !['A', 'K', 'Q'].includes(card.value)) {
+                    const val = getCardValue(card.value);
+                    if (valueCounts[val] === 1) {
                         discards.add(index);
                     }
+                });
+            } else if (handEval.rank === 2) {
+                // One pair - keep pair and highest cards
+                const valueCounts = {};
+                dealerHand.forEach(card => {
+                    const val = getCardValue(card.value);
+                    valueCounts[val] = (valueCounts[val] || 0) + 1;
+                });
+                
+                const singleCards = dealerHand
+                    .map((card, index) => ({card, index, val: getCardValue(card.value)}))
+                    .filter(item => valueCounts[item.val] === 1)
+                    .sort((a, b) => a.val - b.val);
+                
+                // Discard lowest single cards
+                singleCards.slice(0, Math.max(0, singleCards.length - 1)).forEach(item => {
+                    discards.add(item.index);
+                });
+            } else {
+                // High card or weak hand - try to improve
+                const sortedCards = dealerHand
+                    .map((card, index) => ({card, index, val: getCardValue(card.value)}))
+                    .sort((a, b) => a.val - b.val);
+                
+                // Keep highest 2-3 cards
+                sortedCards.slice(0, 2).forEach(item => {
+                    discards.add(item.index);
                 });
             }
             
@@ -372,8 +484,7 @@
         function toggleCard(index) {
             if (gamePhase !== 'trading') return;
             
-            const hasAce = playerHand.some(card => card.value === 'A');
-            const maxTrades = hasAce ? 4 : 3;
+            const maxTrades = playerHand.some(card => card.value === 'A') ? 4 : 3;
             document.getElementById('max-trades').textContent = maxTrades;
             
             if (selectedCards.has(index)) {
@@ -390,75 +501,111 @@
             const playerArea = document.getElementById('player-cards');
             const dealerArea = document.getElementById('dealer-cards');
             
+            // Display player cards
             playerArea.innerHTML = playerHand.map((card, index) => `
                 <div class="card ${selectedCards.has(index) ? 'selected' : ''} 
                             ${isRed(card.suit) ? 'red' : 'black'}"
-                     onclick="toggleCard(${index})">
-                    ${card.value}${card.suit}
+                     onclick="toggleCard(${index})" 
+                     ${gamePhase === 'trading' ? '' : 'style="cursor: default;"'}>
+                    <div>${card.value}</div>
+                    <div>${card.suit}</div>
                 </div>
             `).join('');
             
-            dealerArea.innerHTML = gamePhase === 'showdown' 
-                ? dealerHand.map(card => `
+            // Display dealer cards
+            if (gamePhase === 'showdown') {
+                dealerArea.innerHTML = dealerHand.map(card => `
                     <div class="card ${isRed(card.suit) ? 'red' : 'black'}">
-                        ${card.value}${card.suit}
-                    </div>
-                `).join('')
-                : dealerHand.map(() => `
-                    <div class="card">
-                        🂠
+                        <div>${card.value}</div>
+                        <div>${card.suit}</div>
                     </div>
                 `).join('');
+            } else {
+                dealerArea.innerHTML = dealerHand.map(() => `
+                    <div class="card back">🂠</div>
+                `).join('');
+            }
+            
+            // Display hand evaluations
+            if (gamePhase === 'showdown' || gamePhase === 'trading') {
+                const playerEval = evaluateHand(playerHand);
+                document.getElementById('player-hand-info').innerHTML = 
+                    `<strong>Your Hand: ${playerEval.name}</strong>`;
+                
+                if (gamePhase === 'showdown') {
+                    const dealerEval = evaluateHand(dealerHand);
+                    document.getElementById('dealer-hand-info').innerHTML = 
+                        `<strong>Dealer's Hand: ${dealerEval.name}</strong>`;
+                }
+            }
         }
 
         function isRed(suit) {
             return suit === '♥' || suit === '♦';
         }
 
-        function fold() {
-            if (!['trading', 'showdown'].includes(gamePhase)) return;
+        function placeBet() {
+            if (gamePhase !== 'betting') return;
             
-            pot = 0;
-            document.getElementById('pot').textContent = pot;
-            document.getElementById('message').textContent = 'You folded';
-            resetGame();
-        }
-
-        function resetGame() {
-            gamePhase = 'betting';
-            selectedCards.clear();
-            document.getElementById('selected-count').textContent = '0';
+            const betAmount = parseInt(document.getElementById('bet-amount').value);
+            const maxBet = Math.min(playerMoney, 1000);
+            
+            if (betAmount < 10 || betAmount > maxBet) {
+                alert(`Bet must be between $10 and $${maxBet}`);
+                return;
+            }
+            
+            if (betAmount > playerMoney) {
+                alert('Not enough money!');
+                return;
+            }
+            
+            playerMoney -= betAmount;
+            pot = betAmount * 2; // Dealer matches the bet
+            currentBet = betAmount;
+            
+            updateDisplay();
+            
+            gamePhase = 'dealing';
+            document.getElementById('bet-btn').disabled = true;
             document.getElementById('deal-btn').disabled = false;
-            document.getElementById('trade-btn').disabled = true;
-            document.getElementById('fold-btn').disabled = true;
-            document.getElementById('showdown-btn').disabled = true;
-            document.getElementById('bet-btn').disabled = false;
+            document.getElementById('message').textContent = 'Bet placed! Click Deal Cards to start.';
         }
 
         function dealCards() {
-            if (gamePhase !== 'betting') return;
+            if (gamePhase !== 'dealing') return;
             
             createDeck();
             shuffle();
             playerHand = deck.splice(0, 5);
             dealerHand = deck.splice(0, 5);
+            selectedCards.clear();
             
             gamePhase = 'trading';
             document.getElementById('deal-btn').disabled = true;
             document.getElementById('trade-btn').disabled = false;
             document.getElementById('fold-btn').disabled = false;
-            document.getElementById('bet-btn').disabled = true;
             
-            const hasAce = playerHand.some(card => card.value === 'A');
-            document.getElementById('max-trades').textContent = hasAce ? '4' : '3';
+            const maxTrades = playerHand.some(card => card.value === 'A') ? 4 : 3;
+            document.getElementById('max-trades').textContent = maxTrades;
+            document.getElementById('selected-count').textContent = '0';
+            
             displayCards();
+            document.getElementById('message').textContent = 'Select cards to trade (click on cards), then click Trade or Show Down.';
+            document.getElementById('showdown-btn').disabled = false;
         }
 
         function tradeCards() {
             if (gamePhase !== 'trading') return;
             
+            if (selectedCards.size === 0) {
+                document.getElementById('message').textContent = 'No cards selected to trade!';
+                return;
+            }
+            
             // Player trades
-            for (let index of selectedCards) {
+            const tradedCards = Array.from(selectedCards).sort((a, b) => b - a);
+            for (let index of tradedCards) {
                 playerHand[index] = deck.pop();
             }
             
@@ -471,63 +618,120 @@
             selectedCards.clear();
             document.getElementById('selected-count').textContent = '0';
             
-            gamePhase = 'showdown';
-            document.getElementById('trade-btn').disabled = true;
-            document.getElementById('showdown-btn').disabled = false;
             displayCards();
+            document.getElementById('trade-btn').disabled = true;
+            document.getElementById('message').textContent = `You traded ${tradedCards.length} card(s). Click Show Down to reveal hands!`;
         }
 
         function showDown() {
-            if (gamePhase !== 'showdown') return;
+            if (gamePhase !== 'trading') return;
+            
+            gamePhase = 'showdown';
             
             const playerHandRank = evaluateHand(playerHand);
             const dealerHandRank = evaluateHand(dealerHand);
             
             displayCards();
             
-            let message = `Your hand: ${playerHandRank.name} vs Dealer's hand: ${dealerHandRank.name}\n`;
+            let message = '';
+            let winnings = 0;
             
-            if (playerHandRank.rank > dealerHandRank.rank) {
-                message += 'You win! 🎉';
-                playerMoney += pot * 2;
-            } else if (playerHandRank.rank < dealerHandRank.rank) {
-                message += 'Dealer wins! 😢';
+            if (playerHandRank.score > dealerHandRank.score) {
+                message = `🎉 YOU WIN! 🎉\n${playerHandRank.name} beats ${dealerHandRank.name}`;
+                winnings = pot;
+                playerMoney += winnings;
+            } else if (playerHandRank.score < dealerHandRank.score) {
+                message = `😢 Dealer wins!\n${dealerHandRank.name} beats ${playerHandRank.name}`;
+                winnings = 0;
             } else {
-                message += 'It\'s a tie! 🤝';
-                playerMoney += pot;
+                message = `🤝 It's a tie!\n${playerHandRank.name} vs ${dealerHandRank.name}`;
+                winnings = currentBet; // Return player's bet
+                playerMoney += winnings;
             }
             
-            document.getElementById('message').textContent = message;
-            document.getElementById('player-money').textContent = playerMoney;
-            pot = 0;
-            document.getElementById('pot').textContent = pot;
+            if (winnings > 0) {
+                message += `\nYou won $${winnings}!`;
+            }
             
-            resetGame();
+            document.getElementById('message').innerHTML = message.replace(/\n/g, '<br>');
+            
+            pot = 0;
+            updateDisplay();
+            
+            // Check if player is out of money
+            if (playerMoney < 10) {
+                setTimeout(() => {
+                    alert('Game Over! You\'re out of money. Starting a new game...');
+                    newGame();
+                }, 2000);
+            } else {
+                setTimeout(() => {
+                    nextRound();
+                }, 3000);
+            }
         }
 
-        function placeBet() {
-            if (gamePhase !== 'betting') return;
+        function fold() {
+            if (!['trading'].includes(gamePhase)) return;
             
-            const betAmount = parseInt(document.getElementById('bet-amount').value);
-            if (betAmount <= 0 || betAmount > playerMoney) {
-                alert('Invalid bet amount!');
-                return;
-            }
+            document.getElementById('message').textContent = 'You folded. Dealer wins the pot.';
+            pot = 0;
+            updateDisplay();
             
-            playerMoney -= betAmount;
-            pot += betAmount;
+            setTimeout(() => {
+                nextRound();
+            }, 2000);
+        }
+
+        function nextRound() {
+            round++;
+            gamePhase = 'betting';
+            selectedCards.clear();
             
+            // Reset buttons
+            document.getElementById('deal-btn').disabled = true;
+            document.getElementById('trade-btn').disabled = true;
+            document.getElementById('fold-btn').disabled = true;
+            document.getElementById('showdown-btn').disabled = true;
+            document.getElementById('bet-btn').disabled = false;
+            
+            // Clear displays
+            document.getElementById('player-cards').innerHTML = '';
+            document.getElementById('dealer-cards').innerHTML = '';
+            document.getElementById('player-hand-info').innerHTML = '';
+            document.getElementById('dealer-hand-info').innerHTML = '';
+            document.getElementById('selected-count').textContent = '0';
+            document.getElementById('max-trades').textContent = '3';
+            
+            updateDisplay();
+            document.getElementById('message').textContent = 'New round! Place your bet to continue.';
+        }
+
+        function newGame() {
+            playerMoney = 1000;
+            pot = 0;
+            round = 1;
+            currentBet = 0;
+            document.getElementById('bet-amount').value = 10;
+            nextRound();
+        }
+
+        function updateDisplay() {
             document.getElementById('player-money').textContent = playerMoney;
             document.getElementById('pot').textContent = pot;
+            document.getElementById('round').textContent = round;
             
-            dealCards();
+            // Update bet input max value
+            const betInput = document.getElementById('bet-amount');
+            betInput.max = Math.min(playerMoney, 1000);
+            if (parseInt(betInput.value) > playerMoney) {
+                betInput.value = Math.min(10, playerMoney);
+            }
         }
 
         // Initialize the game
-        document.getElementById('player-money').textContent = playerMoney;
-        document.getElementById('pot').textContent = pot;
-        document.getElementById('selected-count').textContent = '0';
+        updateDisplay();
+        document.getElementById('message').textContent = 'Welcome to 5 Card Draw Poker! Place your bet to start playing.';
     </script>
 </body>
 </html>
-
