@@ -260,53 +260,53 @@
 </head>
 <body>
     <div class="game-container">
-        <h1>🃏 5 Card Draw Poker 🃏</h1>
+        <h1>5 Card Draw Poker</h1>
         
         <div class="game-info">
             <div class="info-box">
-                <h3>💰 Pot: $<span id="pot">0</span></h3>
+                <h3>Pot: $<span id="pot">0</span></h3>
             </div>
             <div class="info-box">
-                <h3>💵 Your Money: $<span id="player-money">1000</span></h3>
+                <h3>Your Money: $<span id="player-money">100</span></h3>
             </div>
             <div class="info-box">
-                <h3>🎯 Selected: <span id="selected-count">0</span>/<span id="max-trades">3</span></h3>
+                <h3>Selected: <span id="selected-count">0</span>/<span id="max-trades">3</span></h3>
             </div>
             <div class="info-box">
-                <h3>🎮 Round: <span id="round">1</span></h3>
+                <h3>Round: <span id="round">1</span></h3>
             </div>
         </div>
 
         <div class="dealer-area">
-            <h2>🤖 Dealer's Hand</h2>
+            <h2>Dealer's Hand</h2>
             <div id="dealer-cards"></div>
             <div id="dealer-hand-info"></div>
         </div>
 
         <div class="betting-area">
             <label for="bet-amount" style="font-weight: bold;">Bet Amount:</label>
-            <input type="number" id="bet-amount" min="10" max="1000" step="10" value="10">
-            <button onclick="placeBet()" id="bet-btn">💰 Place Bet</button>
+            <input type="number" id="bet-amount" min="10" max="100" step="10" value="10">
+            <button onclick="placeBet()" id="bet-btn">Place Bet</button>
         </div>
 
         <div class="player-area">
-            <h2>👤 Your Hand</h2>
+            <h2>Your Hand</h2>
             <div id="player-cards"></div>
             <div id="player-hand-info"></div>
         </div>
 
         <div class="controls">
-            <button onclick="dealCards()" id="deal-btn" disabled>🎴 Deal Cards</button>
-            <button onclick="tradeCards()" id="trade-btn" disabled>🔄 Trade Selected</button>
-            <button onclick="showDown()" id="showdown-btn" disabled>🎯 Show Down</button>
-            <button onclick="fold()" id="fold-btn" disabled>❌ Fold</button>
-            <button onclick="newGame()" id="new-game-btn">🎲 New Game</button>
+            <button onclick="dealCards()" id="deal-btn" disabled>Deal Cards</button>
+            <button onclick="tradeCards()" id="trade-btn" disabled>Trade Selected</button>
+            <button onclick="showDown()" id="showdown-btn" disabled>Show Down</button>
+            <button onclick="fold()" id="fold-btn" disabled>Fold</button>
+            <button onclick="newGame()" id="new-game-btn">New Game</button>
         </div>
 
         <div id="message">Place your bet to start playing!</div>
 
         <div class="hand-rankings">
-            <h2>🏆 Poker Hand Rankings (Highest to Lowest)</h2>
+            <h2>Poker Hand Rankings (Highest to Lowest)</h2>
             <table>
                 <tr><th>Rank</th><th>Hand</th><th>Example</th></tr>
                 <tr><td>1.</td><td>Royal Flush</td><td>A♠ K♠ Q♠ J♠ 10♠</td></tr>
@@ -330,10 +330,10 @@
         let playerHand = [];
         let dealerHand = [];
         let selectedCards = new Set();
-        let playerMoney = 1000;
+        let playerMoney = 100;
         let pot = 0;
         let currentBet = 0;
-        let gamePhase = 'betting'; // 'betting', 'dealing', 'trading', 'showdown'
+        let gamePhase = 'betting'; 
         let round = 1;
 
         function createDeck() {
@@ -548,7 +548,7 @@
             if (gamePhase !== 'betting') return;
             
             const betAmount = parseInt(document.getElementById('bet-amount').value);
-            const maxBet = Math.min(playerMoney, 1000);
+            const maxBet = Math.min(playerMoney, 100);
             
             if (betAmount < 10 || betAmount > maxBet) {
                 alert(`Bet must be between $10 and $${maxBet}`);
@@ -708,7 +708,7 @@
         }
 
         function newGame() {
-            playerMoney = 1000;
+            playerMoney = 100;
             pot = 0;
             round = 1;
             currentBet = 0;
@@ -723,7 +723,7 @@
             
             // Update bet input max value
             const betInput = document.getElementById('bet-amount');
-            betInput.max = Math.min(playerMoney, 1000);
+            betInput.max = Math.min(playerMoney, 100);
             if (parseInt(betInput.value) > playerMoney) {
                 betInput.value = Math.min(10, playerMoney);
             }
