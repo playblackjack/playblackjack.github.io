@@ -1,0 +1,907 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Slots - Joe's Casino</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: #0a0a0a;
+            min-height: 100vh;
+        }
+
+        .slot-machine {
+            animation: float 4s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-8px); }
+        }
+
+        /* Rolling Reel System */
+        .reel-window {
+            width: 100px;
+            height: 120px;
+            overflow: hidden;
+            position: relative;
+            background: linear-gradient(180deg, #1a1a1a 0%, #0f0f0f 100%);
+            border-radius: 8px;
+            border: 2px solid #333;
+        }
+
+        @media (min-width: 640px) {
+            .reel-window {
+                width: 140px;
+                height: 160px;
+            }
+        }
+
+        .reel-strip {
+            position: absolute;
+            width: 100%;
+            top: 0;
+            left: 0;
+            transform: translateY(0);
+        }
+
+        .reel-symbol {
+            height: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3.5rem;
+        }
+
+        @media (min-width: 640px) {
+            .reel-symbol {
+                height: 160px;
+                font-size: 5rem;
+            }
+        }
+
+        .reel-window::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 35px;
+            background: linear-gradient(180deg, rgba(0,0,0,0.9) 0%, transparent 100%);
+            z-index: 5;
+            pointer-events: none;
+        }
+
+        .reel-window::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 35px;
+            background: linear-gradient(0deg, rgba(0,0,0,0.9) 0%, transparent 100%);
+            z-index: 5;
+            pointer-events: none;
+        }
+
+        .win-line {
+            position: absolute;
+            height: 4px;
+            background: linear-gradient(90deg, transparent, #d4af37, transparent);
+            width: 100%;
+            top: 50%;
+            left: 0;
+            animation: winPulse 0.6s ease-in-out infinite;
+            z-index: 10;
+            pointer-events: none;
+            box-shadow: 0 0 10px #d4af37;
+        }
+
+        @keyframes winPulse {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
+
+        .btn {
+            transition: all 0.2s;
+            font-weight: 700;
+        }
+
+        .btn:hover:not(:disabled) {
+            transform: scale(1.05);
+        }
+
+        .btn:active:not(:disabled) {
+            transform: scale(0.95);
+        }
+
+        .btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .balance-display {
+            background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
+            border: 2px solid #444;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .slot-body {
+            background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
+            border: 3px solid #333;
+        }
+
+        .lever {
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 2rem;
+        }
+
+        .lever:hover {
+            transform: rotate(15deg) scale(1.1);
+        }
+
+        .lever.pulled {
+            animation: leverPull 0.5s ease-out;
+        }
+
+        @keyframes leverPull {
+            0% { transform: rotate(0deg); }
+            30% { transform: rotate(40deg); }
+            100% { transform: rotate(0deg); }
+        }
+
+        .particle {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: #d4af37;
+            border-radius: 50%;
+            pointer-events: none;
+            animation: particleFall 1s ease-out forwards;
+        }
+
+        @keyframes particleFall {
+            0% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(100px) scale(0);
+            }
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #dc2626;
+            color: white;
+            padding: 16px 24px;
+            border-radius: 12px;
+            font-weight: bold;
+            z-index: 1000;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            animation: slideDown 0.3s ease-out;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateX(-50%) translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(-50%) translateY(0);
+            }
+        }
+
+        .multiplier-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: bold;
+        }
+
+        .win-10x { background: #fbbf24; color: #000; }
+        .win-5x { background: #f59e0b; color: #000; }
+        .win-3x { background: #10b981; color: #000; }
+        .win-2x { background: #3b82f6; color: #fff; }
+        .win-1-5x { background: #6366f1; color: #fff; }
+        .win-1-25x { background: #8b5cf6; color: #fff; }
+        .win-1x { background: #6b7280; color: #fff; }
+        .loss-0x { background: #ef4444; color: #fff; }
+        .loss-0-25x { background: #f97316; color: #fff; }
+        .loss-0-5x { background: #f59e0b; color: #000; }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-4">
+    <div id="bankruptNotification" class="notification" style="display: none;"></div>
+
+    <div class="max-w-6xl w-full">
+        <!-- Header -->
+        <div class="text-center mb-6">
+            <h1 class="text-4xl sm:text-5xl font-black text-white mb-2">
+                🎰 SLOT MACHINE
+            </h1>
+            <p class="text-sm sm:text-base text-gray-400">Fair Odds • Multiple Win Levels</p>
+        </div>
+
+        <div class="grid lg:grid-cols-3 gap-4 sm:gap-6">
+            <!-- Left Panel - Controls -->
+            <div class="stat-card rounded-xl p-4 sm:p-6 space-y-4">
+                <!-- Balance -->
+                <div class="balance-display rounded-xl p-4 sm:p-6 text-center">
+                    <div class="text-xs sm:text-sm text-gray-400 mb-1">BALANCE</div>
+                    <div class="text-3xl sm:text-4xl font-black text-white" id="balance">$250.00</div>
+                    <div id="resetTimer" class="text-xs text-gray-400 mt-2" style="display: none;"></div>
+                </div>
+
+                <!-- Bet Selection -->
+                <div class="stat-card rounded-lg p-3 sm:p-4">
+                    <label class="text-white text-xs sm:text-sm font-bold mb-2 block">BET AMOUNT</label>
+                    <div class="grid grid-cols-3 gap-2 mb-3">
+                        <button onclick="setBet(1)" class="bet-btn btn bg-gray-700 hover:bg-gray-600 text-white py-2 rounded text-sm">$1</button>
+                        <button onclick="setBet(5)" class="bet-btn btn bg-gray-700 hover:bg-gray-600 text-white py-2 rounded text-sm ring-2 ring-gray-500">$5</button>
+                        <button onclick="setBet(10)" class="bet-btn btn bg-gray-700 hover:bg-gray-600 text-white py-2 rounded text-sm">$10</button>
+                        <button onclick="setBet(25)" class="bet-btn btn bg-gray-700 hover:bg-gray-600 text-white py-2 rounded text-sm">$25</button>
+                        <button onclick="setBet(50)" class="bet-btn btn bg-gray-700 hover:bg-gray-600 text-white py-2 rounded text-sm">$50</button>
+                        <button onclick="setBet(100)" class="bet-btn btn bg-gray-700 hover:bg-gray-600 text-white py-2 rounded text-sm">$100</button>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-xs text-gray-400 mb-1">Current Bet</div>
+                        <div class="text-2xl font-black text-white" id="currentBet">$5.00</div>
+                    </div>
+                </div>
+
+                <!-- Spin Button -->
+                <button 
+                    onclick="spin()" 
+                    id="spinBtn"
+                    class="w-full btn bg-gray-700 hover:bg-gray-600 text-white py-4 sm:py-5 rounded-xl font-black text-lg sm:text-xl">
+                    🎰 SPIN
+                </button>
+
+                <!-- Quick Actions -->
+                <div class="grid grid-cols-2 gap-2">
+                    <button onclick="maxBet()" class="btn bg-gray-600 hover:bg-gray-500 text-white py-2 sm:py-3 rounded-lg font-bold text-sm">MAX BET</button>
+                    <button onclick="autoSpin()" id="autoBtn" class="btn bg-gray-600 hover:bg-gray-500 text-white py-2 sm:py-3 rounded-lg font-bold text-sm">AUTO</button>
+                </div>
+
+                <!-- Stats -->
+                <div class="stat-card rounded-lg p-3 sm:p-4 space-y-2 text-sm">
+                    <div class="flex justify-between">
+                        <span class="text-gray-400">Total Spins:</span>
+                        <span class="text-white font-bold" id="totalSpins">0</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-400">Total Won:</span>
+                        <span class="text-green-400 font-bold" id="totalWon">$0.00</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-400">Total Lost:</span>
+                        <span class="text-red-400 font-bold" id="totalLost">$0.00</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-400">Win Rate:</span>
+                        <span class="text-white font-bold" id="winRate">0%</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-400">Biggest Win:</span>
+                        <span class="text-white font-bold" id="biggestWin">$0.00</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Center - Slot Machine -->
+            <div class="stat-card rounded-xl p-4 sm:p-6 slot-machine">
+                <!-- Win Message -->
+                <div id="winMessage" class="text-center mb-4 h-8 sm:h-10">
+                    <div class="text-lg sm:text-xl font-bold"></div>
+                </div>
+
+                <!-- Slot Body -->
+                <div class="slot-body rounded-xl p-4 sm:p-6 shadow-2xl">
+                    <div id="winLine" class="win-line" style="display: none;"></div>
+                    
+                    <!-- Reels -->
+                    <div class="grid grid-cols-3 gap-2 sm:gap-3 mb-4 sm:mb-6">
+                        <div class="reel-window" id="reel1">
+                            <div class="reel-strip"></div>
+                        </div>
+                        <div class="reel-window" id="reel2">
+                            <div class="reel-strip"></div>
+                        </div>
+                        <div class="reel-window" id="reel3">
+                            <div class="reel-strip"></div>
+                        </div>
+                    </div>
+
+                    <!-- Controls -->
+                    <div class="flex justify-between items-center">
+                        <div class="lever" onclick="spin()" id="lever">🎮</div>
+                        <div class="text-center flex-1">
+                            <div class="text-xs text-gray-400">LAST RESULT</div>
+                            <div class="text-xl sm:text-2xl font-black text-white" id="lastWin">$0.00</div>
+                            <div id="lastMultiplier" class="mt-1"></div>
+                        </div>
+                        <div class="text-2xl">💰</div>
+                    </div>
+                </div>
+
+                <!-- Info -->
+                <div class="mt-4 text-center text-xs text-gray-400">
+                    <p>Multiple Win Levels • Fair Random Outcomes</p>
+                </div>
+            </div>
+
+            <!-- Right Panel - Paytable -->
+            <div class="stat-card rounded-xl p-4 sm:p-6">
+                <h2 class="text-xl sm:text-2xl font-black text-white mb-4 text-center">💰 PAYTABLE</h2>
+                
+                <div class="space-y-2 text-xs sm:text-sm mb-4">
+                    <div class="text-white font-bold mb-2">WIN COMBINATIONS</div>
+                    
+                    <div class="stat-card rounded-lg p-2 hover:bg-white/5 transition">
+                        <div class="flex justify-between items-center">
+                            <span class="text-white">💰💰💰</span>
+                            <span class="multiplier-badge win-10x">10x · 1%</span>
+                        </div>
+                    </div>
+
+                    <div class="stat-card rounded-lg p-2 hover:bg-white/5 transition">
+                        <div class="flex justify-between items-center">
+                            <span class="text-white">⭐⭐⭐</span>
+                            <span class="multiplier-badge win-5x">5x · 3%</span>
+                        </div>
+                    </div>
+
+                    <div class="stat-card rounded-lg p-2 hover:bg-white/5 transition">
+                        <div class="flex justify-between items-center">
+                            <span class="text-white">🔔🔔🔔</span>
+                            <span class="multiplier-badge win-3x">3x · 6%</span>
+                        </div>
+                    </div>
+
+                    <div class="stat-card rounded-lg p-2 hover:bg-white/5 transition">
+                        <div class="flex justify-between items-center">
+                            <span class="text-white">🍇🍇🍇</span>
+                            <span class="multiplier-badge win-2x">2x · 12%</span>
+                        </div>
+                    </div>
+
+                    <div class="stat-card rounded-lg p-2 hover:bg-white/5 transition">
+                        <div class="flex justify-between items-center">
+                            <span class="text-white">💰💰 + Any</span>
+                            <span class="multiplier-badge win-1-5x">1.5x · 15%</span>
+                        </div>
+                    </div>
+
+                    <div class="stat-card rounded-lg p-2 hover:bg-white/5 transition">
+                        <div class="flex justify-between items-center">
+                            <span class="text-white">💰 + Mixed</span>
+                            <span class="multiplier-badge win-1-25x">1.25x · 18%</span>
+                        </div>
+                    </div>
+
+                    <div class="stat-card rounded-lg p-2 hover:bg-white/5 transition">
+                        <div class="flex justify-between items-center">
+                            <span class="text-white">Random Mix</span>
+                            <span class="multiplier-badge win-1x">1x · 10%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="space-y-2 text-xs sm:text-sm">
+                    <div class="text-white font-bold mb-2">LOSS COMBINATIONS</div>
+                    
+                    <div class="stat-card rounded-lg p-2 hover:bg-white/5 transition">
+                        <div class="flex justify-between items-center">
+                            <span class="text-white">❌❌ + Any</span>
+                            <span class="multiplier-badge loss-0-5x">0.5x · 10%</span>
+                        </div>
+                    </div>
+
+                    <div class="stat-card rounded-lg p-2 hover:bg-white/5 transition">
+                        <div class="flex justify-between items-center">
+                            <span class="text-white">❌ + Mixed</span>
+                            <span class="multiplier-badge loss-0-25x">0.25x · 10%</span>
+                        </div>
+                    </div>
+
+                    <div class="stat-card rounded-lg p-2 hover:bg-white/5 transition">
+                        <div class="flex justify-between items-center">
+                            <span class="text-white">❌❌❌</span>
+                            <span class="multiplier-badge loss-0x">0x · 25%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-6 text-center text-xs text-gray-400 space-y-1">
+                    <p>💰 Money bags boost wins!</p>
+                    <p>❌ X's cause losses</p>
+                    <p>💾 Progress auto-saved</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Game State
+        let balance = 250;
+        let currentBet = 5;
+        let spinning = false;
+        let totalSpins = 0;
+        let totalWins = 0;
+        let totalWon = 0;
+        let totalLost = 0;
+        let biggestWin = 0;
+        let autoSpinActive = false;
+        let autoSpinTimeout;
+        let bankruptTime = null;
+
+        // Symbol Configuration with multipliers
+        const outcomes = [
+            { multiplier: 10, weight: 1, symbols: ['💰', '💰', '💰'], color: 'win-10x' },      // 1% - 3 money bags
+            { multiplier: 5, weight: 3, symbols: ['⭐', '⭐', '⭐'], color: 'win-5x' },        // 3% - 3 stars
+            { multiplier: 3, weight: 6, symbols: ['🔔', '🔔', '🔔'], color: 'win-3x' },       // 6% - 3 bells
+            { multiplier: 2, weight: 12, symbols: ['🍇', '🍇', '🍇'], color: 'win-2x' },      // 12% - 3 grapes
+            { multiplier: 1.5, weight: 15, symbols: 'mixed-2bags', color: 'win-1-5x' },      // 15% - mixed with 2 bags
+            { multiplier: 1.25, weight: 18, symbols: 'mixed-1bag', color: 'win-1-25x' },     // 18% - mixed with 1 bag
+            { multiplier: 1, weight: 10, symbols: 'mixed-0bags', color: 'win-1x' },          // 10% - mixed, no bags
+            { multiplier: 0.5, weight: 10, symbols: ['❌', '❌', '🍊'], color: 'loss-0-5x' }, // 10% - 2 X's
+            { multiplier: 0.25, weight: 10, symbols: ['❌', '🍋', '🍊'], color: 'loss-0-25x' },// 10% - 1 X
+            { multiplier: 0, weight: 25, symbols: ['❌', '❌', '❌'], color: 'loss-0x' }      // 25% - 3 X's
+        ];
+
+        // Helper to generate mixed symbols
+        function generateMixedSymbols(numBags) {
+            const otherSymbols = ['⭐', '🔔', '🍇', '🍊', '🍋'];
+            const result = [];
+            
+            // Add money bags
+            for (let i = 0; i < numBags; i++) {
+                result.push('💰');
+            }
+            
+            // Fill remaining with random other symbols (must be different from each other)
+            const remaining = 3 - numBags;
+            const shuffled = [...otherSymbols].sort(() => Math.random() - 0.5);
+            for (let i = 0; i < remaining; i++) {
+                result.push(shuffled[i]);
+            }
+            
+            // Shuffle the final result
+            return result.sort(() => Math.random() - 0.5);
+        }
+
+        // LocalStorage Functions
+        function saveGame() {
+            const gameState = {
+                balance,
+                totalSpins,
+                totalWins,
+                totalWon,
+                totalLost,
+                biggestWin,
+                bankruptTime
+            };
+            localStorage.setItem('slotMachineGame', JSON.stringify(gameState));
+        }
+
+        function loadGame() {
+            const saved = localStorage.getItem('slotMachineGame');
+            if (saved) {
+                const gameState = JSON.parse(saved);
+                balance = gameState.balance || 250;
+                totalSpins = gameState.totalSpins || 0;
+                totalWins = gameState.totalWins || 0;
+                totalWon = gameState.totalWon || 0;
+                totalLost = gameState.totalLost || 0;
+                biggestWin = gameState.biggestWin || 0;
+                bankruptTime = gameState.bankruptTime || null;
+            }
+        }
+
+        function checkBankruptcy() {
+            if (balance <= 0 && bankruptTime) {
+                const now = Date.now();
+                const twoHours = 2 * 60 * 60 * 1000;
+                const timeLeft = (bankruptTime + twoHours) - now;
+
+                if (timeLeft > 0) {
+                    // Still locked out
+                    showBankruptNotification(timeLeft);
+                    disableSpinning();
+                    updateResetTimer(timeLeft);
+                    return true;
+                } else {
+                    // 2 hours passed, reset balance
+                    balance = 250;
+                    bankruptTime = null;
+                    saveGame();
+                    hideBankruptNotification();
+                    enableSpinning();
+                    updateDisplay();
+                    return false;
+                }
+            } else if (balance <= 0) {
+                // Just went bankrupt
+                bankruptTime = Date.now();
+                saveGame();
+                showBankruptNotification(2 * 60 * 60 * 1000);
+                disableSpinning();
+                updateResetTimer(2 * 60 * 60 * 1000);
+                return true;
+            }
+            return false;
+        }
+
+        function showBankruptNotification(timeLeft) {
+            const notification = document.getElementById('bankruptNotification');
+            const hours = Math.floor(timeLeft / (60 * 60 * 1000));
+            const minutes = Math.floor((timeLeft % (60 * 60 * 1000)) / (60 * 1000));
+            notification.textContent = `⏰ Come back in ${hours}h ${minutes}m to try again!`;
+            notification.style.display = 'block';
+        }
+
+        function hideBankruptNotification() {
+            document.getElementById('bankruptNotification').style.display = 'none';
+        }
+
+        function updateResetTimer(timeLeft) {
+            const timerDiv = document.getElementById('resetTimer');
+            if (timeLeft > 0) {
+                const hours = Math.floor(timeLeft / (60 * 60 * 1000));
+                const minutes = Math.floor((timeLeft % (60 * 60 * 1000)) / (60 * 1000));
+                const seconds = Math.floor((timeLeft % (60 * 1000)) / 1000);
+                timerDiv.textContent = `Reset in: ${hours}h ${minutes}m ${seconds}s`;
+                timerDiv.style.display = 'block';
+            } else {
+                timerDiv.style.display = 'none';
+            }
+        }
+
+        function disableSpinning() {
+            document.getElementById('spinBtn').disabled = true;
+            document.getElementById('autoBtn').disabled = true;
+            document.getElementById('lever').style.pointerEvents = 'none';
+            document.getElementById('lever').style.opacity = '0.3';
+        }
+
+        function enableSpinning() {
+            document.getElementById('spinBtn').disabled = false;
+            document.getElementById('autoBtn').disabled = false;
+            document.getElementById('lever').style.pointerEvents = 'auto';
+            document.getElementById('lever').style.opacity = '1';
+        }
+
+        // Weighted Random Outcome Selection
+        function getRandomOutcome() {
+            const totalWeight = outcomes.reduce((sum, o) => sum + o.weight, 0);
+            let random = Math.random() * totalWeight;
+            
+            for (let outcome of outcomes) {
+                random -= outcome.weight;
+                if (random <= 0) {
+                    return outcome;
+                }
+            }
+            return outcomes[0];
+        }
+
+        // Get random symbol for reel animation (visual only)
+        function getRandomSymbol() {
+            const symbols = ['💎', '🎰', '⭐', '🔔', '🍇', '🍊', '🍋', '🍒', '❌'];
+            return symbols[Math.floor(Math.random() * symbols.length)];
+        }
+
+        // Update Display
+        function updateDisplay() {
+            document.getElementById('balance').textContent = `$${balance.toFixed(2)}`;
+            document.getElementById('currentBet').textContent = `$${currentBet.toFixed(2)}`;
+            document.getElementById('totalSpins').textContent = totalSpins;
+            document.getElementById('totalWon').textContent = `$${totalWon.toFixed(2)}`;
+            document.getElementById('totalLost').textContent = `$${totalLost.toFixed(2)}`;
+            document.getElementById('biggestWin').textContent = `$${biggestWin.toFixed(2)}`;
+            
+            const winRate = totalSpins > 0 ? Math.round((totalWins / totalSpins) * 100) : 0;
+            document.getElementById('winRate').textContent = `${winRate}%`;
+        }
+
+        // Set Bet
+        function setBet(amount) {
+            if (!spinning && balance >= amount) {
+                currentBet = amount;
+                updateDisplay();
+                
+                document.querySelectorAll('.bet-btn').forEach(btn => {
+                    btn.classList.remove('ring-2', 'ring-gray-500');
+                });
+                event.target.classList.add('ring-2', 'ring-gray-500');
+            }
+        }
+
+        // Max Bet
+        function maxBet() {
+            if (!spinning) {
+                const maxBets = [100, 50, 25, 10, 5, 1];
+                for (let bet of maxBets) {
+                    if (balance >= bet) {
+                        currentBet = bet;
+                        updateDisplay();
+                        document.querySelectorAll('.bet-btn').forEach(btn => {
+                            btn.classList.remove('ring-2', 'ring-gray-500');
+                            if (btn.textContent === `$${bet}`) {
+                                btn.classList.add('ring-2', 'ring-gray-500');
+                            }
+                        });
+                        break;
+                    }
+                }
+            }
+        }
+
+        // Auto Spin
+        function autoSpin() {
+            autoSpinActive = !autoSpinActive;
+            const btn = document.getElementById('autoBtn');
+            
+            if (autoSpinActive) {
+                btn.textContent = 'STOP';
+                btn.classList.add('ring-2', 'ring-red-500');
+                autoSpinSequence();
+            } else {
+                btn.textContent = 'AUTO';
+                btn.classList.remove('ring-2', 'ring-red-500');
+                if (autoSpinTimeout) {
+                    clearTimeout(autoSpinTimeout);
+                }
+            }
+        }
+
+        function autoSpinSequence() {
+            if (autoSpinActive && balance >= currentBet) {
+                spin();
+                autoSpinTimeout = setTimeout(autoSpinSequence, 2500);
+            } else {
+                autoSpinActive = false;
+                document.getElementById('autoBtn').textContent = 'AUTO';
+                document.getElementById('autoBtn').classList.remove('ring-2', 'ring-red-500');
+            }
+        }
+
+        // Show Win/Loss Message
+        function showResultMessage(outcome, netAmount) {
+            const msgContainer = document.getElementById('winMessage');
+            const msg = msgContainer.querySelector('div');
+            const multiplierDiv = document.getElementById('lastMultiplier');
+            
+            if (outcome.multiplier >= 1) {
+                // Win
+                if (outcome.multiplier >= 5) {
+                    msg.textContent = `🎉 JACKPOT! +$${netAmount.toFixed(2)}`;
+                    msg.className = 'text-xl sm:text-2xl font-bold text-yellow-400';
+                    createParticles();
+                } else if (outcome.multiplier >= 3) {
+                    msg.textContent = `🌟 BIG WIN! +$${netAmount.toFixed(2)}`;
+                    msg.className = 'text-xl sm:text-2xl font-bold text-yellow-500';
+                } else {
+                    msg.textContent = `✨ WIN! +$${netAmount.toFixed(2)}`;
+                    msg.className = 'text-lg sm:text-xl font-bold text-green-400';
+                }
+                
+                multiplierDiv.innerHTML = `<span class="multiplier-badge ${outcome.color}">${outcome.multiplier}x</span>`;
+                document.getElementById('winLine').style.display = 'block';
+                setTimeout(() => {
+                    document.getElementById('winLine').style.display = 'none';
+                }, 1500);
+            } else if (outcome.multiplier > 0) {
+                // Partial loss
+                msg.textContent = `Partial Loss: -$${(-netAmount).toFixed(2)}`;
+                msg.className = 'text-lg sm:text-xl font-bold text-orange-400';
+                multiplierDiv.innerHTML = `<span class="multiplier-badge ${outcome.color}">${outcome.multiplier}x</span>`;
+            } else {
+                // Total loss
+                msg.textContent = `Total Loss: -$${currentBet.toFixed(2)}`;
+                msg.className = 'text-lg sm:text-xl font-bold text-red-500';
+                multiplierDiv.innerHTML = `<span class="multiplier-badge ${outcome.color}">0x</span>`;
+            }
+            
+            setTimeout(() => {
+                msg.textContent = '';
+                multiplierDiv.innerHTML = '';
+            }, 2500);
+        }
+
+        // Create Particle Effect
+        function createParticles() {
+            const container = document.querySelector('.slot-body');
+            for (let i = 0; i < 15; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.top = Math.random() * 50 + '%';
+                particle.style.animationDelay = Math.random() * 0.3 + 's';
+                container.appendChild(particle);
+                
+                setTimeout(() => particle.remove(), 1000);
+            }
+        }
+
+        // Animate Reel
+        function animateReel(reelId, finalSymbol, duration, delay) {
+            return new Promise(resolve => {
+                setTimeout(() => {
+                    const reelWindow = document.getElementById(reelId);
+                    const strip = reelWindow.querySelector('.reel-strip');
+                    
+                    strip.innerHTML = '';
+                    const symbolHeight = window.innerWidth >= 640 ? 160 : 120;
+                    const numSymbols = 25;
+                    
+                    // Fill with random symbols
+                    for (let i = 0; i < numSymbols; i++) {
+                        const symbolDiv = document.createElement('div');
+                        symbolDiv.className = 'reel-symbol';
+                        symbolDiv.textContent = getRandomSymbol();
+                        strip.appendChild(symbolDiv);
+                    }
+                    
+                    // Add final symbol
+                    const finalDiv = document.createElement('div');
+                    finalDiv.className = 'reel-symbol';
+                    finalDiv.textContent = finalSymbol;
+                    strip.appendChild(finalDiv);
+                    
+                    // Calculate scroll distance
+                    const targetY = -(numSymbols * symbolHeight);
+                    
+                    strip.style.transform = 'translateY(0px)';
+                    strip.style.transition = 'none';
+                    
+                    setTimeout(() => {
+                        strip.style.transition = `transform ${duration}ms cubic-bezier(0.25, 0.1, 0.25, 1)`;
+                        strip.style.transform = `translateY(${targetY}px)`;
+                    }, 50);
+                    
+                    setTimeout(() => resolve(), duration + 50);
+                }, delay);
+            });
+        }
+
+        // Main Spin Function
+        async function spin() {
+            if (spinning || balance < currentBet) {
+                if (balance < currentBet) {
+                    alert('Insufficient balance! Lower your bet.');
+                }
+                return;
+            }
+            
+            spinning = true;
+            document.getElementById('spinBtn').disabled = true;
+            
+            // Lever animation
+            document.getElementById('lever').classList.add('pulled');
+            setTimeout(() => {
+                document.getElementById('lever').classList.remove('pulled');
+            }, 500);
+            
+            // Deduct bet
+            balance -= currentBet;
+            updateDisplay();
+            
+            // Generate outcome
+            const outcome = getRandomOutcome();
+            
+            // Determine final symbols for each reel
+            let finalSymbols;
+            if (typeof outcome.symbols === 'string') {
+                // Mixed symbols
+                if (outcome.symbols === 'mixed-2bags') {
+                    finalSymbols = generateMixedSymbols(2);
+                } else if (outcome.symbols === 'mixed-1bag') {
+                    finalSymbols = generateMixedSymbols(1);
+                } else if (outcome.symbols === 'mixed-0bags') {
+                    finalSymbols = generateMixedSymbols(0);
+                }
+            } else {
+                // Array of symbols
+                finalSymbols = outcome.symbols;
+            }
+            
+            // Animate reels with their respective final symbols
+            await Promise.all([
+                animateReel('reel1', finalSymbols[0], 1800, 0),
+                animateReel('reel2', finalSymbols[1], 2100, 100),
+                animateReel('reel3', finalSymbols[2], 2400, 200)
+            ]);
+            
+            // Calculate payout
+            const payout = currentBet * outcome.multiplier;
+            const netAmount = payout - currentBet; // Net win/loss
+            
+            totalSpins++;
+            
+            if (outcome.multiplier >= 1) {
+                // Win
+                balance += payout;
+                totalWon += (payout - currentBet);
+                totalWins++;
+                
+                if (payout > biggestWin) {
+                    biggestWin = payout;
+                }
+                
+                document.getElementById('lastWin').textContent = `+${(payout - currentBet).toFixed(2)}`;
+            } else {
+                // Loss (partial or total)
+                balance += payout; // Add back partial amount if any
+                totalLost += (currentBet - payout);
+                
+                document.getElementById('lastWin').textContent = `-${(currentBet - payout).toFixed(2)}`;
+            }
+            
+            showResultMessage(outcome, netAmount);
+            updateDisplay();
+            saveGame();
+            
+            // Check if bankrupt
+            checkBankruptcy();
+            
+            spinning = false;
+            if (balance >= currentBet) {
+                document.getElementById('spinBtn').disabled = false;
+            }
+        }
+
+        // Keyboard Support
+        document.addEventListener('keydown', (e) => {
+            if (e.code === 'Space' && !spinning && balance >= currentBet) {
+                e.preventDefault();
+                spin();
+            }
+        });
+
+        // Update timer every second if bankrupt
+        setInterval(() => {
+            if (bankruptTime) {
+                const now = Date.now();
+                const twoHours = 2 * 60 * 60 * 1000;
+                const timeLeft = (bankruptTime + twoHours) - now;
+                
+                if (timeLeft > 0) {
+                    updateResetTimer(timeLeft);
+                    showBankruptNotification(timeLeft);
+                } else {
+                    checkBankruptcy();
+                }
+            }
+        }, 1000);
+
+        // Initialize
+        loadGame();
+        checkBankruptcy();
+        updateDisplay();
+    </script>
+</body>
+</html>
